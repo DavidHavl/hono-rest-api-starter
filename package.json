@@ -1,5 +1,5 @@
 {
-  "name": "cloudflare-workers-openapi",
+  "name": "hono-rest-api-starter",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -32,7 +32,6 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "drizzle-orm": "^0.30.10",
     "hono": "^4.3.4",
-    "mitt": "^3.0.1",
     "nanoid": "^5.0.7",
     "zod": "^3.23.8"
   }
