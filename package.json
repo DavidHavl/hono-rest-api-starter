@@ -1,19 +1,39 @@
 {
-	"name": "cloudflare-workers-openapi",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev"
-	},
-	"dependencies": {
-		"@cloudflare/itty-router-openapi": "^1.0.1"
-	},
-	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20240222.0",
-		"@types/node": "^20.5.7",
-		"@types/service-worker-mock": "^2.0.1",
-		"wrangler": "^3.0.0"
-	}
+  "name": "cloudflare-workers-openapi",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "migration:generate": "drizzle-kit generate",
+    "migration:migrate": "drizzle-kit migrate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.7.3",
+    "@cloudflare/workers-types": "^4.20240502.0",
+    "@types/node": "^20.12.11",
+    "@types/service-worker-mock": "^2.0.4",
+    "drizzle-kit": "^0.21.0",
+    "wrangler": "^3.53.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "dependencies": {
+    "@auth/core": "^0.29.0",
+    "@hono/auth-js": "^1.0.3",
+    "@hono/swagger-ui": "^0.2.1",
+    "@hono/zod-openapi": "^0.11.0",
+    "@hono/zod-validator": "^0.2.1",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "drizzle-orm": "^0.30.10",
+    "hono": "^4.3.4",
+    "mitt": "^3.0.1",
+    "nanoid": "^5.0.7",
+    "zod": "^3.23.8"
+  }
 }

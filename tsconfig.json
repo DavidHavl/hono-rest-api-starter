@@ -25,7 +25,8 @@
 			"@types/node",
 			"@types/service-worker-mock",
 			"@cloudflare/workers-types/2023-07-01"
-		]
+		],
+		"paths": { "@/*": ["*"] }
 	},
 	"exclude": ["node_modules", "dist", "tests"],
 	"include": ["src", "scripts"]
