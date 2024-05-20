@@ -20,7 +20,7 @@ export const SuccessResponseSchema = z.object({
           assigneeId: '123456789',
           createdAt: 1711978082,
           updatedAt: 1711978082,
-          completed: false,
+          isCompleted: false,
         },
       }),
       relationships: z
@@ -80,23 +80,23 @@ export const CollectionSuccessResponseSchema = z.object({
     .object({
       self: z.string().url().openapi({
         example:
-          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[completed]=true&page[limit]=10&page[number]=2',
+          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[isCompleted]=true&page[limit]=10&page[number]=2',
       }),
       first: z.string().url().openapi({
         example:
-          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[completed]=true&page[limit]=10&page[number]=1',
+          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[isCompleted]=true&page[limit]=10&page[number]=1',
       }),
       last: z.string().url().openapi({
         example:
-          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[completed]=true&page[limit]=10&page[number]=12',
+          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[isCompleted]=true&page[limit]=10&page[number]=12',
       }),
       prev: z.string().url().openapi({
         example:
-          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[completed]=true&page[limit]=10&page[number]=1',
+          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[isCompleted]=true&page[limit]=10&page[number]=1',
       }),
       next: z.string().url().openapi({
         example:
-          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[completed]=true&page[limit]=10&page[number]=3', // page[cursor]=sdfa
+          'https://api.website.com/tasks?fields=id,title&sort=-createdAt&filter[isCompleted]=true&page[limit]=10&page[number]=3', // page[cursor]=sdfa
       }),
     })
     .optional()

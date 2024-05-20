@@ -13,7 +13,7 @@ export const TasksTable = sqliteTable('tasks', {
   listId: text('listId').notNull(),
   ownerId: text('ownerId').notNull(),
   assigneeId: text('assigneeId'),
-  completed: integer('completed', { mode: 'boolean' }).notNull().default(false),
+  isCompleted: integer('isCompleted', { mode: 'boolean' }).notNull().default(false),
   completedAt: integer('completedAt', { mode: 'timestamp' }),
   createdAt: integer('createdAt', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updatedAt', { mode: 'timestamp' }).$onUpdateFn(() => new Date()),

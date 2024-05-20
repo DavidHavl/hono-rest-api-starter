@@ -7,8 +7,8 @@ export const TeamMembersTable = sqliteTable('team-members', {
     .$defaultFn(() => createId()),
   userId: text('userId').notNull(),
   teamId: text('teamId').notNull(),
-  hasUserAccepted: integer('userAccepted', { mode: 'boolean' }).default(false),
-  hasTeamAccepted: integer('teamAccepted', { mode: 'boolean' }).default(false),
+  hasUserAccepted: integer('hasUserAccepted', { mode: 'boolean' }).default(false),
+  hasResourceAccepted: integer('hasResourceAccepted', { mode: 'boolean' }).default(false),
   createdAt: integer('createdAt', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updatedAt', { mode: 'timestamp' }).$onUpdateFn(() => new Date()),
 });

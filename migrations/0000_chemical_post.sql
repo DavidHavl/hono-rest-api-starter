@@ -27,7 +27,7 @@ CREATE TABLE `tasks` (
 	`listId` text NOT NULL,
 	`ownerId` text NOT NULL,
 	`assigneeId` text,
-	`completed` integer DEFAULT false NOT NULL,
+	`isCompleted` integer DEFAULT false NOT NULL,
 	`completedAt` integer,
 	`createdAt` integer,
 	`updatedAt` integer
@@ -37,8 +37,8 @@ CREATE TABLE `team-members` (
 	`id` text PRIMARY KEY NOT NULL,
 	`userId` text NOT NULL,
 	`teamId` text NOT NULL,
-	`userAccepted` integer DEFAULT false,
-	`teamAccepted` integer DEFAULT false,
+	`hasUserAccepted` integer DEFAULT false,
+	`hasResourceAccepted` integer DEFAULT false,
 	`createdAt` integer,
 	`updatedAt` integer
 );

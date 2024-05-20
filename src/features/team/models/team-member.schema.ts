@@ -14,7 +14,7 @@ export const TeamMemberSchema = z
     hasUserAccepted: z.boolean().default(false).optional().openapi({
       example: false,
     }),
-    hasTeamAccepted: z.boolean().default(false).optional().openapi({
+    hasResourceAccepted: z.boolean().default(false).optional().openapi({
       example: false,
     }),
     createdAt: z.coerce.date().openapi({
