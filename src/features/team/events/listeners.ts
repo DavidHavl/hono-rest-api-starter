@@ -24,6 +24,8 @@ export const teamCreatedEventHandler = async ({ c, team }: { c: Context; team: T
     .values({
       userId: team.ownerId,
       teamId: team.id,
+      hasUserAccepted: true,
+      hasResourceAccepted: true,
     })
     .returning();
   emitter.emit('team-member.created', { c, teamMember: inserted[0] });
