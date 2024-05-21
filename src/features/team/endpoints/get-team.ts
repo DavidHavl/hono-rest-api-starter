@@ -116,7 +116,14 @@ export const handler = async (
   const teamMemberResult = await db
     .select()
     .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, result[0].id), eq(TeamMembersTable.userId, user.id)));
+    .where(
+      and(
+        eq(TeamMembersTable.teamId, result[0].id),
+        eq(TeamMembersTable.userId, user.id),
+        eq(TeamMembersTable.hasUserAccepted, true),
+        eq(TeamMembersTable.hasResourceAccepted, true),
+      ),
+    );
 
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {

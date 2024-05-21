@@ -9,7 +9,7 @@ import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
@@ -33,8 +33,8 @@ const ResponseSchema = CollectionSuccessResponseSchema.merge(
         id: z.string().openapi({
           example: 'gy63blmknjbhvg43e2d',
         }),
-        type: z.string().default('teams').openapi({
-          example: 'teams',
+        type: z.string().default(entityType).openapi({
+          example: entityType,
         }),
         attributes: TeamSchema,
         links: z.object({
@@ -93,7 +93,16 @@ export const handler = async (
     return unauthorizedResponse(c);
   }
 
-  const teamMemberResult = await db.select().from(TeamMembersTable).where(eq(TeamMembersTable.userId, user.id));
+  const teamMemberResult = await db
+    .select()
+    .from(TeamMembersTable)
+    .where(
+      and(
+        eq(TeamMembersTable.userId, user.id),
+        eq(TeamMembersTable.hasUserAccepted, true),
+        eq(TeamMembersTable.hasResourceAccepted, true),
+      ),
+    );
 
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {

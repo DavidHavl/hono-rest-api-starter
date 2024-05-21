@@ -36,8 +36,8 @@ const ResponseSchema = CollectionSuccessResponseSchema.merge(
         id: z.string().openapi({
           example: 'gy63blmknjbhvg43e2d',
         }),
-        type: z.string().default('task-lists').openapi({
-          example: 'task-lists',
+        type: z.string().default(entityType).openapi({
+          example: entityType,
         }),
         attributes: TaskListSchema,
         links: z.object({

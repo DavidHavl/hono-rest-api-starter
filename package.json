@@ -6,6 +6,8 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "migration:generate": "drizzle-kit generate",
     "migration:migrate": "drizzle-kit migrate"
   },
@@ -14,7 +16,9 @@
     "@cloudflare/workers-types": "^4.20240502.0",
     "@types/node": "^20.12.11",
     "@types/service-worker-mock": "^2.0.4",
+    "dotenv": "^16.4.5",
     "drizzle-kit": "^0.21.0",
+    "vitest": "^1.6.0",
     "wrangler": "^3.53.1"
   },
   "peerDependencies": {
