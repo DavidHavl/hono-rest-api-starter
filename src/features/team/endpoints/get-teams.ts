@@ -90,7 +90,7 @@ export const handler = async (
 
   if (!user) {
     // Unauthorized
-    return unauthorizedResponse(c);
+    return unauthorizedResponse(c, 'No user found');
   }
 
   const teamMemberResult = await db
@@ -106,7 +106,7 @@ export const handler = async (
 
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {
-    return unauthorizedResponse(c);
+    return unauthorizedResponse(c, 'User is not a member of any team');
   }
 
   const ids = teamMemberResult.map((teamMember) => teamMember.teamId);
