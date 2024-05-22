@@ -130,7 +130,7 @@ export const handler = async (
   }
 
   let users: User[] = [];
-  if (include?.split(',', user).includes('user')) {
+  if (include?.split(',').includes('user')) {
     const userIds = teamMemberResult.map((teamMember) => teamMember.userId);
     users = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
   }
