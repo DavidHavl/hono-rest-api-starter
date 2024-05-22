@@ -20,7 +20,7 @@ const entityType = 'team-members';
 
 const QuerySchema = z.object({
   fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from team schema that are allowed to be queried
-  include: z.string().optional().openapi({ example: 'user,comments' }),
+  include: z.enum(['user']).optional().openapi({ example: 'user' }),
   teamId: z.string().openapi({ example: '123456789' }),
 });
 
