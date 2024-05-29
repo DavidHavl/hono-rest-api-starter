@@ -31,7 +31,7 @@ function getAuthConfig(c: Context<{ Bindings: Env; Variables: Vars }>): AuthConf
       GitHub({
         clientId: c.env.AUTH_GITHUB_CLIENT_ID,
         clientSecret: c.env.AUTH_GITHUB_CLIENT_SECRET,
-        checks: ['none'], // TODO: this is very unsecure!
+        checks: ['pkce'],
         profile: (profile) => {
           // Build simple object from GitHub profile
           return {

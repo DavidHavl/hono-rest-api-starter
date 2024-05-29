@@ -1,6 +1,6 @@
 import type { EmitterEvents } from '@/events';
-import type { Emitter } from '@/utils/emitter';
 import type { DrizzleD1Database } from 'drizzle-orm/d1/driver';
+import type { Emitter } from 'hono-event-emitter';
 
 export type Env = {
   CORS_ORIGINS: string;

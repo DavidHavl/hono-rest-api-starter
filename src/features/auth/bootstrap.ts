@@ -1,4 +1,4 @@
-import { authMiddleware } from '@/features/auth/middleware/auth.middleware';
+import { authGuard } from '@/features/auth/guards/auth.guard';
 import type { Env, Vars } from '@/types';
 import { authHandler, initAuthConfig } from '@hono/auth-js';
 import type { OpenAPIHono } from '@hono/zod-openapi';
@@ -14,5 +14,5 @@ export default function (
 
   app.use('/auth/*', authHandler()); // Add handlers for auth/signin, auth/signout, and auth/callback routes
 
-  app.use('/*', authMiddleware); // Add auth guards for all routes that need it
+  app.use('/*', authGuard({ excludePaths: ['/', '/docs'] })); // Add auth guards for all routes that need it
 }

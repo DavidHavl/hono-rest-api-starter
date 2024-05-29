@@ -13,13 +13,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.7.3",
-    "@cloudflare/workers-types": "^4.20240502.0",
-    "@types/node": "^20.12.11",
+    "@cloudflare/workers-types": "^4.20240512.0",
+    "@types/node": "^20.12.12",
     "@types/service-worker-mock": "^2.0.4",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.21.0",
     "vitest": "^1.6.0",
-    "wrangler": "^3.53.1"
+    "wrangler": "^3.57.1"
   },
   "peerDependencies": {
     "typescript": "^5.3.3"
@@ -28,14 +28,15 @@
     "node": ">=20.10.0"
   },
   "dependencies": {
-    "@auth/core": "^0.29.0",
-    "@hono/auth-js": "^1.0.3",
-    "@hono/swagger-ui": "^0.2.1",
-    "@hono/zod-openapi": "^0.11.0",
+    "@auth/core": "^0.31.0",
+    "@hono/auth-js": "^1.0.7",
+    "@hono/swagger-ui": "^0.2.2",
+    "@hono/zod-openapi": "^0.14.0",
     "@hono/zod-validator": "^0.2.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "drizzle-orm": "^0.30.10",
-    "hono": "^4.3.4",
+    "hono": "^4.4.0",
+    "hono-event-emitter": "^1.0.0",
     "nanoid": "^5.0.7",
     "zod": "^3.23.8"
   }

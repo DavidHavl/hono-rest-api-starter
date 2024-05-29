@@ -3,8 +3,8 @@ import type { TaskList } from '@/features/task/models/task-list.type';
 import type { TeamMember } from '@/features/team/models/team-member.type';
 import type { Team } from '@/features/team/models/team.type';
 import type { User } from '@/features/user/models/user.type';
-import { createEmitter } from '@/utils/emitter';
 import type { Context } from 'hono';
+import { createEmitter } from 'hono-event-emitter';
 
 export type EmitterEvents = {
   'user.created': { c: Context; user: User };
