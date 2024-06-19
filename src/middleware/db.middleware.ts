@@ -7,7 +7,7 @@ export let db = null;
  */
 export const dbMiddleware = async (c: Context, next) => {
   if (db === null) {
-    db = drizzle(c.env.D1Database);
+    db = drizzle(c.env.D1Database, { logger: true });
   }
   c.set('db', db);
   return next();

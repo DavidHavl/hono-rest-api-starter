@@ -1,27 +1,30 @@
-import { z } from '@hono/zod-openapi';
+import { TaskListsTable } from '@/features/task/models/task-lists.table';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-export const TaskListSchema = z
-  .object({
-    id: z.string().cuid2().openapi({
-      example: 'gy63blmknjbhvg43e2d',
-    }),
-    title: z.string().openapi({
-      example: 'Shopping List',
-    }),
-    teamId: z.string().cuid2().openapi({
-      example: 'erdcvid6tlqy72ghjs4',
-    }),
-    projectId: z.string().cuid2().openapi({
-      example: '6tghjserdcvidy74lq2',
-    }),
-    ownerId: z.string().cuid2().optional().openapi({
-      example: 'dfgerdew35647568utjh',
-    }),
-    createdAt: z.coerce.date().openapi({
-      example: '2024-04-19T14:37:58.000Z',
-    }),
-    updatedAt: z.coerce.date().openapi({
-      example: '2024-04-19T14:37:58.000Z',
-    }),
+export const TaskListSchema = createSelectSchema(TaskListsTable)
+  .openapi({
+    description: 'Task List',
+    example: {
+      id: 'gy63blmknjbhvg43e2d',
+      title: 'Shopping List',
+      teamId: 'erdcvid6tltfdeagf3',
+      projectId: '6tghjserdcvidy74lq2',
+      ownerId: 'dfgerdew35647568utjh',
+      createdAt: '2024-04-19T14:37:58.000Z',
+      updatedAt: '2024-04-19T14:37:58.000Z',
+    },
   })
   .openapi('Task List');
+
+export const CreateTaskListSchema = createInsertSchema(TaskListsTable).openapi({
+  description: 'Task List',
+  example: {
+    id: 'gy63blmknjbhvg43e2d',
+    title: 'Shopping List',
+    teamId: 'erdcvid6tltfdeagf3',
+    projectId: '6tghjserdcvidy74lq2',
+    ownerId: 'dfgerdew35647568utjh',
+    createdAt: '2024-04-19T14:37:58.000Z',
+    updatedAt: '2024-04-19T14:37:58.000Z',
+  },
+});

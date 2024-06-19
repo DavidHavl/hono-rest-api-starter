@@ -1,7 +1,10 @@
 import { getCurentUser } from '@/features/auth/utils';
+import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
+import { createCollectionSuccessResponseSchema } from '@/features/shared/responses/success.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import { TeamSchema } from '@/features/team/models/team.schema';
 import { TeamsTable } from '@/features/team/models/teams.table';
@@ -9,15 +12,17 @@ import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { and, eq, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
+import { createSelectSchema } from 'drizzle-zod';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
 
 // LOCAL SCHEMAS //
 
+const fieldKeys = Object.keys(TeamSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from team schema that are allowed to be queried
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
 });
 
 interface RequestValidationTargets {
@@ -26,29 +31,7 @@ interface RequestValidationTargets {
   };
 }
 
-const ResponseSchema = CollectionSuccessResponseSchema.merge(
-  z.object({
-    data: z.array(
-      z.object({
-        id: z.string().openapi({
-          example: 'gy63blmknjbhvg43e2d',
-        }),
-        type: z.string().default(entityType).openapi({
-          example: entityType,
-        }),
-        attributes: TeamSchema,
-        links: z.object({
-          self: z
-            .string()
-            .url()
-            .openapi({
-              example: `https://api.website.com/${entityType}/thgbw45brtb4rt5676uh`,
-            }),
-        }),
-      }),
-    ),
-  }),
-);
+const ResponseSchema = createCollectionSuccessResponseSchema(entityType, TeamSchema);
 
 // ROUTE //
 export const route = createRoute({
@@ -70,10 +53,18 @@ export const route = createRoute({
     400: {
       content: {
         'application/vnd.api+json': {
-          schema: ErrorResponseSchema,
+          schema: InvalidInputResponseSchema,
         },
       },
       description: 'Bad Request',
+    },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
     },
   },
 });
@@ -89,21 +80,18 @@ export const handler = async (
   const user = getCurentUser(c);
 
   if (!user) {
-    // Unauthorized
     return unauthorizedResponse(c, 'No user found');
   }
 
-  const teamMemberResult = await db
-    .select()
-    .from(TeamMembersTable)
-    .where(
-      and(
-        eq(TeamMembersTable.userId, user.id),
-        eq(TeamMembersTable.hasUserAccepted, true),
-        eq(TeamMembersTable.hasResourceAccepted, true),
-      ),
-    );
+  const teamMemberResult = await db.select().from(TeamMembersTable).where(
+    // and(
+    eq(TeamMembersTable.userId, user.id),
+    // eq(TeamMembersTable.hasUserAccepted, true),
+    // eq(TeamMembersTable.hasResourceAccepted, true),
+    // ),
+  );
 
+  // Unauthorized
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {
     return unauthorizedResponse(c, 'User is not a member of any team');

@@ -1,7 +1,8 @@
 import { getCurentUser } from '@/features/auth/utils';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
+import { createCollectionSuccessResponseSchema } from '@/features/shared/responses/success.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamMemberSchema } from '@/features/team/models/team-member.schema';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import { UserSchema } from '@/features/user/models/user.schema';
@@ -18,8 +19,9 @@ const entityType = 'team-members';
 
 // LOCAL SCHEMAS //
 
+const fieldKeys = Object.keys(TeamMemberSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from team schema that are allowed to be queried
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
   include: z.enum(['user']).optional().openapi({ example: 'user' }),
   teamId: z.string().openapi({ example: '123456789' }),
 });
@@ -30,49 +32,7 @@ interface RequestValidationTargets {
   };
 }
 
-const ResponseSchema = CollectionSuccessResponseSchema.merge(
-  z.object({
-    data: z.array(
-      z.object({
-        id: z.string().openapi({
-          example: 'gy63blmknjbhvg43e2d',
-        }),
-        type: z.string().default(entityType).openapi({
-          example: entityType,
-        }),
-        attributes: TeamMemberSchema,
-        relationships: z.object({
-          user: z
-            .object({
-              data: z.object({
-                id: z.string().openapi({
-                  example: '1eq5ebrtbiuoerg91ldfqw',
-                }),
-                type: z.string().openapi({
-                  example: 'users',
-                }),
-                attributes: UserSchema,
-                links: z.object({
-                  self: z.string().url().openapi({
-                    example: 'https://api.website.com/users/1eq5ebrtbiuoerg91ldfqw',
-                  }),
-                }),
-              }),
-            })
-            .optional(),
-        }),
-        links: z.object({
-          self: z
-            .string()
-            .url()
-            .openapi({
-              example: `https://api.website.com/${entityType}/thgbw45brtb4rt5676uh`,
-            }),
-        }),
-      }),
-    ),
-  }),
-);
+const ResponseSchema = createCollectionSuccessResponseSchema(entityType, TeamMemberSchema);
 
 // ROUTE //
 export const route = createRoute({
@@ -99,6 +59,14 @@ export const route = createRoute({
       },
       description: 'Bad Request',
     },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
+    },
   },
 });
 
@@ -123,10 +91,11 @@ export const handler = async (
   if (
     teamMemberResult.length === 0 ||
     !teamMemberResult.some(
-      (teamMember) => teamMember.userId === user.id && teamMember.hasUserAccepted && teamMember.hasResourceAccepted,
+      (teamMember) =>
+        teamMember.userId === user.id /*&& teamMember.hasUserAccepted && teamMember.hasResourceAccepted,*/,
     )
   ) {
-    return unauthorizedResponse(c);
+    return unauthorizedResponse(c, 'Not a member of given team');
   }
 
   let users: User[] = [];

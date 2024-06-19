@@ -1,8 +1,9 @@
 import { getCurentUser } from '@/features/auth/utils';
+import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
+import { notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import { TaskSchema } from '@/features/task/models/task.schema';
 import { TasksTable } from '@/features/task/models/tasks.table';
@@ -17,9 +18,9 @@ import type { Context } from 'hono';
 const entityType = 'tasks';
 
 // LOCAL SCHEMAS //
-
+const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from task schema that are allowed to be queried
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
   listId: z.string().openapi({ example: '123456789' }),
 });
 

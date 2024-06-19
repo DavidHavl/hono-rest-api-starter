@@ -1,25 +1,24 @@
 import { getCurentUser } from '@/features/auth/utils';
-import { ProjectSchema } from '@/features/project/models/project.schema';
-import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { SuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
-import { TeamMembersTable } from '@/features/team/models/team-members.table';
+import { notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { UserSchema } from '@/features/user/models/user.schema';
+import { UsersTable } from '@/features/user/models/users.table';
 import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-const entityType = 'projects';
+const entityType = 'users';
 
 // LOCAL SCHEMAS //
 const ParamsSchema = z.object({
   id: z
     .string()
-    .min(3)
+    .min(1)
     .openapi({
       param: {
         name: 'id',
@@ -29,8 +28,9 @@ const ParamsSchema = z.object({
     }),
 });
 
+const fieldKeys = Object.keys(UserSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from project schema that are allowed to be queried
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
 });
 
 interface RequestValidationTargets {
@@ -44,12 +44,12 @@ const ResponseSchema = SuccessResponseSchema.merge(
   z.object({
     data: z.object({
       type: z.string().openapi({
-        example: 'projects',
+        example: 'users',
       }),
       id: z.string().openapi({
         example: 'gy63blmknjbhvg43e2d',
       }),
-      attributes: ProjectSchema,
+      attributes: UserSchema,
       links: z.object({
         self: z
           .string()
@@ -71,7 +71,7 @@ export const route = createRoute({
     params: ParamsSchema,
     query: QuerySchema,
   },
-  description: 'Retrieve a single project by id',
+  description: 'Retrieve single user by ID. Use "me" to retrieve the current user.',
   responses: {
     200: {
       content: {
@@ -79,7 +79,7 @@ export const route = createRoute({
           schema: ResponseSchema,
         },
       },
-      description: 'Retrieve single project',
+      description: 'Retrieve single task',
     },
     400: {
       content: {
@@ -98,7 +98,7 @@ export const handler = async (
 ) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
-  const { id } = c.req.valid('param');
+  const params = c.req.valid('param');
   const query = c.req.valid('query');
   const user = getCurentUser(c);
 
@@ -107,20 +107,19 @@ export const handler = async (
     return unauthorizedResponse(c);
   }
 
-  const result = await db.select().from(ProjectsTable).where(eq(ProjectsTable.id, id));
+  if (params.id === 'me') {
+    params.id = user.id;
+  }
+
+  // Show details of other users to admins only
+  if (user.id !== params.id && user.role !== 'admin' && user.role !== 'superadmin') {
+    return unauthorizedResponse(c);
+  }
+
+  const result = await db.select().from(UsersTable).where(eq(UsersTable.id, params.id));
 
   if (result.length === 0) {
     return notFoundResponse(c);
-  }
-
-  const teamMemberResult = await db
-    .select()
-    .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, result[0].teamId), eq(TeamMembersTable.userId, user.id)));
-
-  // Check if user is a member of the team
-  if (teamMemberResult.length === 0) {
-    return unauthorizedResponse(c);
   }
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({

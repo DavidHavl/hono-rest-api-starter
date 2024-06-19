@@ -1,19 +1,22 @@
 import { getCurentUser } from '@/features/auth/utils';
+import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { SuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
-import { TaskSchema } from '@/features/task/models/task.schema';
-import { TasksTable } from '@/features/task/models/tasks.table';
+import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
+import { TeamSchema } from '@/features/team/models/team.schema';
+import { TeamsTable } from '@/features/team/models/teams.table';
 import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
 import { and, eq } from 'drizzle-orm';
+import { createSelectSchema } from 'drizzle-zod';
 import type { Context } from 'hono';
 
-const entityType = 'tasks';
+const entityType = 'teams';
 
 // LOCAL SCHEMAS //
 const ParamsSchema = z.object({
@@ -29,9 +32,12 @@ const ParamsSchema = z.object({
     }),
 });
 
+const fieldKeys = Object.keys(TeamSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from task schema that are allowed to be queried
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
 });
+
+const ResponseSchema = createSuccessResponseSchema(entityType, ProjectSchema);
 
 interface RequestValidationTargets {
   out: {
@@ -39,29 +45,6 @@ interface RequestValidationTargets {
     query: z.infer<typeof QuerySchema>;
   };
 }
-
-const ResponseSchema = SuccessResponseSchema.merge(
-  z.object({
-    data: z.object({
-      type: z.string().openapi({
-        example: 'tasks',
-      }),
-      id: z.string().openapi({
-        example: 'gy63blmknjbhvg43e2d',
-      }),
-      attributes: TaskSchema,
-      links: z.object({
-        self: z
-          .string()
-          .url()
-          .optional()
-          .openapi({
-            example: `https://api.website.com/${entityType}/thgbw45brtb4rt5676uh`,
-          }),
-      }),
-    }),
-  }),
-);
 
 // ROUTE //
 export const route = createRoute({
@@ -71,7 +54,7 @@ export const route = createRoute({
     params: ParamsSchema,
     query: QuerySchema,
   },
-  description: 'Retrieve a single task by id',
+  description: 'Retrieve a single team by id',
   responses: {
     200: {
       content: {
@@ -79,7 +62,7 @@ export const route = createRoute({
           schema: ResponseSchema,
         },
       },
-      description: 'Retrieve single task',
+      description: 'Retrieve single team',
     },
     400: {
       content: {
@@ -88,6 +71,22 @@ export const route = createRoute({
         },
       },
       description: 'Bad Request',
+    },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
+    },
+    404: {
+      content: {
+        'application/vnd.api+json': {
+          schema: NotFoundResponseSchema,
+        },
+      },
+      description: 'Not Found',
     },
   },
 });
@@ -103,11 +102,10 @@ export const handler = async (
   const user = getCurentUser(c);
 
   if (!user) {
-    // Unauthorized
     return unauthorizedResponse(c);
   }
 
-  const result = await db.select().from(TasksTable).where(eq(TasksTable.id, id));
+  const result = await db.select().from(TeamsTable).where(eq(TeamsTable.id, id));
 
   if (result.length === 0) {
     return notFoundResponse(c);
@@ -116,8 +114,16 @@ export const handler = async (
   const teamMemberResult = await db
     .select()
     .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, result[0].teamId), eq(TeamMembersTable.userId, user.id)));
+    .where(
+      and(
+        eq(TeamMembersTable.teamId, result[0].id),
+        eq(TeamMembersTable.userId, user.id),
+        // eq(TeamMembersTable.hasUserAccepted, true),
+        // eq(TeamMembersTable.hasResourceAccepted, true),
+      ),
+    );
 
+  // Authorization
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {
     return unauthorizedResponse(c);

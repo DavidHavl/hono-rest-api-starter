@@ -1,4 +1,5 @@
 import { bootstrapFeatures } from '@/features/bootstrap';
+import { notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { dbMiddleware } from '@/middleware/db.middleware';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
@@ -37,6 +38,7 @@ app.use((c, next) => {
 });
 
 app.use((c, next) => {
+  // TODO: maybe because it is not '*' ?
   const csrfMiddleware = csrf({
     origin: c.env.CORS_ORIGINS.split(','),
   });
@@ -63,7 +65,8 @@ app.doc('/', (c) => ({
   openapi: '3.0.0',
   info: {
     version: '1.0.0',
-    title: 'Task Manager API',
+    title: 'Hono Rest API',
+    description: 'REST API utilising JSON:API format',
   },
   servers: [
     {
@@ -86,13 +89,7 @@ app.get(
 
 // 404
 app.notFound((c) => {
-  return c.json(
-    {
-      success: false,
-      error: 'Route not found',
-    },
-    { status: 404 },
-  );
+  return notFoundResponse(c, 'Route not found');
 });
 
 // Error handling

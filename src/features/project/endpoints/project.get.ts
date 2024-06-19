@@ -1,10 +1,11 @@
 import { getCurentUser } from '@/features/auth/utils';
+import { ProjectSchema } from '@/features/project/models/project.schema';
+import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
-import { SuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
-import { UserSchema } from '@/features/user/models/user.schema';
-import { UsersTable } from '@/features/user/models/users.table';
+import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
@@ -12,13 +13,13 @@ import { createRoute, z } from '@hono/zod-openapi';
 import { and, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-const entityType = 'users';
+const entityType = 'projects';
 
 // LOCAL SCHEMAS //
 const ParamsSchema = z.object({
   id: z
     .string()
-    .min(1)
+    .min(3)
     .openapi({
       param: {
         name: 'id',
@@ -28,8 +29,9 @@ const ParamsSchema = z.object({
     }),
 });
 
+const fieldKeys = Object.keys(ProjectSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }),
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
 });
 
 interface RequestValidationTargets {
@@ -39,28 +41,7 @@ interface RequestValidationTargets {
   };
 }
 
-const ResponseSchema = SuccessResponseSchema.merge(
-  z.object({
-    data: z.object({
-      type: z.string().openapi({
-        example: 'users',
-      }),
-      id: z.string().openapi({
-        example: 'gy63blmknjbhvg43e2d',
-      }),
-      attributes: UserSchema,
-      links: z.object({
-        self: z
-          .string()
-          .url()
-          .optional()
-          .openapi({
-            example: `https://api.website.com/${entityType}/thgbw45brtb4rt5676uh`,
-          }),
-      }),
-    }),
-  }),
-);
+const ResponseSchema = createSuccessResponseSchema(entityType, ProjectSchema);
 
 // ROUTE //
 export const route = createRoute({
@@ -70,7 +51,7 @@ export const route = createRoute({
     params: ParamsSchema,
     query: QuerySchema,
   },
-  description: 'Retrieve single user by ID. Use "me" to retrieve the current user.',
+  description: 'Retrieve a single project by id',
   responses: {
     200: {
       content: {
@@ -78,7 +59,7 @@ export const route = createRoute({
           schema: ResponseSchema,
         },
       },
-      description: 'Retrieve single task',
+      description: 'Retrieve single project',
     },
     400: {
       content: {
@@ -87,6 +68,22 @@ export const route = createRoute({
         },
       },
       description: 'Bad Request',
+    },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
+    },
+    404: {
+      content: {
+        'application/vnd.api+json': {
+          schema: NotFoundResponseSchema,
+        },
+      },
+      description: 'Not Found',
     },
   },
 });
@@ -97,30 +94,32 @@ export const handler = async (
 ) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
-  const params = c.req.valid('param');
+  const { id } = c.req.valid('param');
   const query = c.req.valid('query');
   const user = getCurentUser(c);
 
   if (!user) {
-    // Unauthorized
     return unauthorizedResponse(c);
   }
 
-  if (params.id === 'me') {
-    params.id = user.id;
-  }
-
-  // Show details of other users to admins only
-  if (user.id !== params.id && user.role !== 'admin' && user.role !== 'superadmin') {
-    return unauthorizedResponse(c);
-  }
-
-  const result = await db.select().from(UsersTable).where(eq(UsersTable.id, params.id));
+  const result = await db.select().from(ProjectsTable).where(eq(ProjectsTable.id, id));
 
   if (result.length === 0) {
     return notFoundResponse(c);
   }
 
+  const teamMemberResult = await db
+    .select()
+    .from(TeamMembersTable)
+    .where(and(eq(TeamMembersTable.teamId, result[0].teamId), eq(TeamMembersTable.userId, user.id)));
+
+  // Authorization.
+  // Check if user is a member of the team
+  if (teamMemberResult.length === 0) {
+    return unauthorizedResponse(c);
+  }
+
+  // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: {
       id: result[0].id,

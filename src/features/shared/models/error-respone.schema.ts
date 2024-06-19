@@ -9,7 +9,7 @@ export const ErrorSchema = z.object({
     example: 400,
   }),
   code: z.string().openapi({
-    example: 'INVALID_INPUT', // TODO: have a list of codes
+    example: 'INVALID_INPUT',
   }),
   title: z.string().openapi({
     example: 'Invalid Input',

@@ -11,6 +11,8 @@ export type EmitterEvents = {
   'team.created': { c: Context; team: Team };
   'team-member.created': { c: Context; teamMember: TeamMember };
   'project.created': { c: Context; project: Project };
+  'project.updated': { c: Context; project: Project };
+  'project.deleted': { c: Context; projectId: string };
   'task-list.created': { c: Context; taskList: TaskList };
 };
 

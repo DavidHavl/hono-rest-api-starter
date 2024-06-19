@@ -3,10 +3,12 @@ import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized';
+import { notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { TaskListSchema } from '@/features/task/models/task-list.schema';
+import { TaskListsTable } from '@/features/task/models/task-lists.table';
+import { TaskSchema } from '@/features/task/models/task.schema';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import { TeamsTable } from '@/features/team/models/teams.table';
 import type { Env, Vars } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
@@ -14,13 +16,13 @@ import { createRoute, z } from '@hono/zod-openapi';
 import { and, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-const entityType = 'projects';
+const entityType = 'task-lists';
 
 // LOCAL SCHEMAS //
-
+const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
-  fields: z.string().optional().openapi({ example: 'id,title' }), // TODO: only fields from project schema that are allowed to be queried
-  teamId: z.string().openapi({ example: '123456789' }),
+  fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
+  projectId: z.string().openapi({ example: '123456789' }),
 });
 
 interface RequestValidationTargets {
@@ -39,7 +41,7 @@ const ResponseSchema = CollectionSuccessResponseSchema.merge(
         type: z.string().default(entityType).openapi({
           example: entityType,
         }),
-        attributes: ProjectSchema,
+        attributes: TaskListSchema,
         links: z.object({
           self: z
             .string()
@@ -60,7 +62,7 @@ export const route = createRoute({
   request: {
     query: QuerySchema,
   },
-  description: 'Retrieve projects for a given team',
+  description: 'Retrieve task lists for a given project',
   responses: {
     200: {
       content: {
@@ -68,7 +70,7 @@ export const route = createRoute({
           schema: ResponseSchema,
         },
       },
-      description: 'Retrieve projects',
+      description: 'Retrieve task lists',
     },
     400: {
       content: {
@@ -88,7 +90,7 @@ export const handler = async (
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const { fields, teamId } = query;
+  const { fields, projectId } = query;
   const user = getCurentUser(c);
 
   if (!user) {
@@ -96,31 +98,31 @@ export const handler = async (
     return unauthorizedResponse(c);
   }
 
-  const teamResult = await db.select().from(TeamsTable).where(eq(TeamsTable.id, teamId));
+  const projectResult = await db.select().from(ProjectsTable).where(eq(ProjectsTable.id, projectId));
 
-  if (teamResult.length === 0) {
-    return notFoundResponse(c, 'Team not found');
+  if (projectResult.length === 0) {
+    return notFoundResponse(c, 'Project not found');
   }
 
   const teamMemberResult = await db
     .select()
     .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, teamId), eq(TeamMembersTable.userId, user.id)));
+    .where(and(eq(TeamMembersTable.teamId, projectResult[0].teamId), eq(TeamMembersTable.userId, user.id)));
 
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {
     return unauthorizedResponse(c);
   }
 
-  const result = await db.select().from(ProjectsTable).where(eq(ProjectsTable.teamId, teamId));
+  const result = await db.select().from(TaskListsTable).where(eq(TaskListsTable.projectId, projectId));
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
-    data: result.map((project) => ({
-      id: project.id,
+    data: result.map((list) => ({
+      id: list.id,
       type: entityType,
-      attributes: fields ? pickObjectProperties(project, fields.split(',')) : project,
+      attributes: fields ? pickObjectProperties(list, fields.split(',')) : list,
       links: {
-        self: `${origin}/${entityType}/${project.id}`,
+        self: `${origin}/${entityType}/${list.id}`,
       },
     })),
     links: {

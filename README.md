@@ -1,6 +1,7 @@
-# Hono REST API
+# Advanced Hono REST API starter kit
 
-This is Real World starter project utilizing Hono, Zod, DrizzleORM, OpenAPI, hono-event-emitter, specifically tailored to run on cloudflare workers.
+This is Real World starter project utilizing Hono, Zod, DrizzleORM, OpenAPI, JSON:API format, hono-event-emitter, specifically tailored to run on cloudflare workers.
+It  for my own needs, but I hope it will be useful for others as well.
 
 ## Get started
 

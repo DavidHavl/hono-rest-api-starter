@@ -32,7 +32,6 @@ function formatInputZodErrors(result: ResultType, c: Context): z.infer<typeof Er
  */
 export const zodErrorMiddleware = (result: ResultType, c: Context) => {
   if (!result.success && 'error' in result && result.error instanceof ZodError) {
-    console.log('in errorMiddleware');
     return c.json<z.infer<typeof ErrorResponseSchema>, 400>(
       {
         errors: formatInputZodErrors(result, c),

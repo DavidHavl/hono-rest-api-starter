@@ -15,14 +15,17 @@ export const teamCreatedEventHandler = async ({
   team: Team;
 }) => {
   const db = c.get('db');
-  console.log('emitter.on(team.created)', team);
-  const inserted = await db
-    .insert(ProjectsTable)
-    .values({
-      title: 'New Project',
-      ownerId: team.ownerId,
-      teamId: team.id,
-    })
-    .returning();
-  emitter.emit('project.created', { c, project: inserted[0] });
+  try {
+    const inserted = await db
+      .insert(ProjectsTable)
+      .values({
+        title: 'New Project',
+        ownerId: team.ownerId,
+        teamId: team.id,
+      })
+      .returning();
+    emitter.emit('project.created', { c, project: inserted[0] });
+  } catch (e) {
+    console.error('Error creating project', e);
+  }
 };
