@@ -1,7 +1,10 @@
 # Advanced Hono REST API starter kit
 
 This is Real World starter project utilizing Hono, Zod, DrizzleORM, OpenAPI, JSON:API format, hono-event-emitter, specifically tailored to run on cloudflare workers.
-It  for my own needs, but I hope it will be useful for others as well.
+
+It serves my own needs, to copy/paste from, when starting new project with the mentioned technology stack, but I hope it will be useful for others as well.
+
+# This is still very much a WIP (work in progress)!
 
 ## Get started
 
@@ -24,9 +27,11 @@ https://orm.drizzle.team/kit-docs/commands#generate-migrations
 - To generate new migration: `pnpm migration:generate`
 - To apply migrations to the DB: `pnpm migration:migrate`
 
+<!--
 Dangerous: 
 - To push current schema to database without using migrations: `drizzle-kit push`
+-->
 
-## REST API
+## UI
 
 - Swager UI: is available at root URL "/docs"
