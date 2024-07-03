@@ -9,6 +9,8 @@ export type EmitterEvents = {
   'user.created': { user: User };
   'team.created': { team: Team };
   'team-member.created': { teamMember: TeamMember };
+  'team-member.updated': { teamMember: TeamMember };
+  'team-member.deleted': { teamMemberId: string };
   'project.created': { project: Project };
   'project.updated': { project: Project };
   'project.deleted': { projectId: string };
