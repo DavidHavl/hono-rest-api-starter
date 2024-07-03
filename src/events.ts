@@ -15,6 +15,8 @@ export type EmitterEvents = {
   'project.updated': { project: Project };
   'project.deleted': { projectId: string };
   'task-list.created': { taskList: TaskList };
+  'task-list.updated': { taskList: TaskList };
+  'task-list.deleted': { taskListId: string };
 };
 
 export const emitter = createEmitter<EmitterEvents>();
