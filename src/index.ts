@@ -9,12 +9,9 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import { secureHeaders } from 'hono/secure-headers';
 import { zodErrorMiddleware } from './middleware/zod-error.middleware';
-import type { Env, Vars } from './types';
+import type { Env } from './types';
 
-export const app = new OpenAPIHono<{
-  Bindings: Env;
-  Variables: Vars;
-}>({
+export const app = new OpenAPIHono<Env>({
   defaultHook: zodErrorMiddleware,
 });
 
@@ -38,7 +35,6 @@ app.use((c, next) => {
 });
 
 app.use((c, next) => {
-  // TODO: maybe because it is not '*' ?
   const csrfMiddleware = csrf({
     origin: c.env.CORS_ORIGINS.split(','),
   });

@@ -6,7 +6,7 @@ import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/sha
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
@@ -99,9 +99,7 @@ export const route = createRoute({
 });
 
 // HANDLER //
-export const handler = async (
-  c: Context<{ Bindings: Env; Variables: Vars }, typeof entityType, RequestValidationTargets>,
-) => {
+export const handler = async (c: Context<Env, typeof entityType, RequestValidationTargets>) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
@@ -141,7 +139,7 @@ export const handler = async (
     .returning();
 
   // Emit event
-  emitter.emit('project.updated', { c, project: result[0] });
+  emitter.emit('project.updated', c, { project: result[0] });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

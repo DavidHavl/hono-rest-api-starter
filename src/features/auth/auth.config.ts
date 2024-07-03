@@ -2,7 +2,7 @@ import { emitter } from '@/events';
 import type { ExtendedAuthUser } from '@/features/auth/models/auth-user';
 import type { User } from '@/features/user/models/user.type';
 import { UsersTable } from '@/features/user/models/users.table';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import GitHub from '@auth/core/providers/github';
 import type { JWT } from '@auth/core/src/jwt';
 import type { Session } from '@auth/core/types';
@@ -10,7 +10,7 @@ import type { AuthConfig } from '@hono/auth-js';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
-function getAuthConfig(c: Context<{ Bindings: Env; Variables: Vars }>): AuthConfig {
+function getAuthConfig(c: Context<Env>): AuthConfig {
   return {
     debug: true,
     basePath: '/auth',
@@ -93,7 +93,7 @@ function getAuthConfig(c: Context<{ Bindings: Env; Variables: Vars }>): AuthConf
               avatarUrl: user.image,
             })
             .returning();
-          emitter.emit('user.created', { c, user: result[0] });
+          emitter.emit('user.created', c, { user: result[0] });
         }
         return true;
       },

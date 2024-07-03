@@ -1,15 +1,10 @@
 import { authGuard } from '@/features/auth/guards/auth.guard';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { authHandler, initAuthConfig } from '@hono/auth-js';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { getAuthConfig } from './auth.config';
 
-export default function (
-  app: OpenAPIHono<{
-    Bindings: Env;
-    Variables: Vars;
-  }>,
-) {
+export default function (app: OpenAPIHono<Env>) {
   app.use('/*', initAuthConfig(getAuthConfig)); // Add auth config to context (under "authConfig" key) for all routes
 
   app.use('/auth/*', authHandler()); // Add handlers for auth/signin, auth/signout, and auth/callback routes

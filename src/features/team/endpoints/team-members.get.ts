@@ -8,7 +8,7 @@ import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import { UserSchema } from '@/features/user/models/user.schema';
 import type { User } from '@/features/user/models/user.type';
 import { UsersTable } from '@/features/user/models/users.table';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
@@ -71,9 +71,7 @@ export const route = createRoute({
 });
 
 // HANDLER //
-export const handler = async (
-  c: Context<{ Bindings: Env; Variables: Vars }, typeof entityType, RequestValidationTargets>,
-) => {
+export const handler = async (c: Context<Env, typeof entityType, RequestValidationTargets>) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');

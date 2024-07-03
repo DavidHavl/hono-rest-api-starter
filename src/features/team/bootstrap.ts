@@ -9,15 +9,10 @@ import { handler as patchTeamHandler, route as patchTeamRoute } from '@/features
 import { handler as getTeamsHandler, route as getTeamsRoute } from '@/features/team/endpoints/teams.get';
 import { handler as postTeamsHandler, route as postTeamsRoute } from '@/features/team/endpoints/teams.post';
 import { teamCreatedEventHandler, userCreatedEventHandler } from '@/features/team/events/listeners';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
-export default function (
-  app: OpenAPIHono<{
-    Bindings: Env;
-    Variables: Vars;
-  }>,
-) {
+export default function (app: OpenAPIHono<Env>) {
   // Setup endpoints
   app.openapi(getTeamRoute, getTeamHandler);
   app.openapi(getTeamsRoute, getTeamsHandler);

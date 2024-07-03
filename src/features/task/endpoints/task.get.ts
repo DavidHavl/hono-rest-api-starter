@@ -2,12 +2,12 @@ import { getCurentUser } from '@/features/auth/utils';
 import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { SuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found.response';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TaskSchema } from '@/features/task/models/task.schema';
 import { TasksTable } from '@/features/task/models/tasks.table';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
@@ -91,13 +91,27 @@ export const route = createRoute({
       },
       description: 'Bad Request',
     },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
+    },
+    404: {
+      content: {
+        'application/vnd.api+json': {
+          schema: NotFoundResponseSchema,
+        },
+      },
+      description: 'Not Found',
+    },
   },
 });
 
 // HANDLER //
-export const handler = async (
-  c: Context<{ Bindings: Env; Variables: Vars }, typeof entityType, RequestValidationTargets>,
-) => {
+export const handler = async (c: Context<Env, typeof entityType, RequestValidationTargets>) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');

@@ -5,7 +5,7 @@ import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/resp
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamsTable } from '@/features/team/models/teams.table';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
@@ -79,9 +79,7 @@ export const route = createRoute({
 });
 
 // HANDLER //
-export const handler = async (
-  c: Context<{ Bindings: Env; Variables: Vars }, typeof entityType, RequestValidationTargets>,
-) => {
+export const handler = async (c: Context<Env, typeof entityType, RequestValidationTargets>) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');

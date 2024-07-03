@@ -1,19 +1,11 @@
-import { emitter } from '@/events';
+import { type EmitterEvents, emitter } from '@/events';
 import { ProjectsTable } from '@/features/project/models/projects.table';
 import type { Team } from '@/features/team/models/team.type';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import type { Context } from 'hono';
+import { defineHandler } from 'hono-event-emitter';
 
-export const teamCreatedEventHandler = async ({
-  c,
-  team,
-}: {
-  c: Context<{
-    Bindings: Env;
-    Variables: Vars;
-  }>;
-  team: Team;
-}) => {
+export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.created', Env>(async (c, { team }) => {
   const db = c.get('db');
   try {
     const inserted = await db
@@ -24,8 +16,8 @@ export const teamCreatedEventHandler = async ({
         teamId: team.id,
       })
       .returning();
-    emitter.emit('project.created', { c, project: inserted[0] });
+    emitter.emit('project.created', c, { project: inserted[0] });
   } catch (e) {
     console.error('Error creating project', e);
   }
-};
+});

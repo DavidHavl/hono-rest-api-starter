@@ -3,13 +3,13 @@ import { ProjectSchema } from '@/features/project/models/project.schema';
 import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
-import { notFoundResponse } from '@/features/shared/responses/not-found.response';
-import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
+import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TaskListSchema } from '@/features/task/models/task-list.schema';
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import { TaskSchema } from '@/features/task/models/task.schema';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import type { Env, Vars } from '@/types';
+import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
@@ -80,13 +80,27 @@ export const route = createRoute({
       },
       description: 'Bad Request',
     },
+    401: {
+      content: {
+        'application/vnd.api+json': {
+          schema: UnauthorizedResponseSchema,
+        },
+      },
+      description: 'Unauthorized',
+    },
+    404: {
+      content: {
+        'application/vnd.api+json': {
+          schema: NotFoundResponseSchema,
+        },
+      },
+      description: 'Not Found',
+    },
   },
 });
 
 // HANDLER //
-export const handler = async (
-  c: Context<{ Bindings: Env; Variables: Vars }, typeof entityType, RequestValidationTargets>,
-) => {
+export const handler = async (c: Context<Env, typeof entityType, RequestValidationTargets>) => {
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');

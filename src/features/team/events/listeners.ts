@@ -1,11 +1,10 @@
-import { emitter } from '@/events';
+import { type EmitterEvents, emitter } from '@/events';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import type { Team } from '@/features/team/models/team.type';
 import { TeamsTable } from '@/features/team/models/teams.table';
-import type { User } from '@/features/user/models/user.type';
-import type { Context } from 'hono';
+import type { Env } from '@/types';
+import { defineHandler } from 'hono-event-emitter';
 
-export const userCreatedEventHandler = async ({ c, user }: { c: Context; user: User }) => {
+export const userCreatedEventHandler = defineHandler<EmitterEvents, 'user.created', Env>(async (c, { user }) => {
   const db = c.get('db');
   const inserted = await db
     .insert(TeamsTable)
@@ -14,10 +13,10 @@ export const userCreatedEventHandler = async ({ c, user }: { c: Context; user: U
       ownerId: user.id,
     })
     .returning();
-  emitter.emit('team.created', { c, team: inserted[0] });
-};
+  emitter.emit('team.created', c, { team: inserted[0] });
+});
 
-export const teamCreatedEventHandler = async ({ c, team }: { c: Context; team: Team }) => {
+export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.created', Env>(async (c, { team }) => {
   const db = c.get('db');
   const inserted = await db
     .insert(TeamMembersTable)
@@ -28,5 +27,5 @@ export const teamCreatedEventHandler = async ({ c, team }: { c: Context; team: T
       hasResourceAccepted: true,
     })
     .returning();
-  emitter.emit('team-member.created', { c, teamMember: inserted[0] });
-};
+  emitter.emit('team-member.created', c, { teamMember: inserted[0] });
+});
