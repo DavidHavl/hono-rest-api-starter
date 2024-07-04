@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@auth/core": "^0.34.1",
-    "@hono/auth-js": "^1.0.9",
+    "@hono/auth-js": "^1.0.10",
     "@hono/swagger-ui": "^0.3.0",
     "@hono/zod-openapi": "^0.14.7",
     "@hono/zod-validator": "^0.2.2",
