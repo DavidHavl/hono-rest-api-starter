@@ -1,5 +1,5 @@
 import { emitter } from '@/events';
-import { getCurentUser } from '@/features/auth/utils';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
@@ -83,7 +83,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');

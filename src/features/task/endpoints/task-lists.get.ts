@@ -1,5 +1,4 @@
-import { getCurentUser } from '@/features/auth/utils';
-import { ProjectSchema } from '@/features/project/models/project.schema';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
@@ -105,7 +104,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
   const { fields, projectId } = query;
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     // Unauthorized

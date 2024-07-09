@@ -1,0 +1,27 @@
+name="hono-rest-api-starter"
+main="src/index.ts"
+compatibility_date="2024-02-23"
+account_id=""
+route={ pattern = "", zone_name = "", custom_domain = true }
+
+[vars]
+ENVIROMENT="development" # Environment name
+CORS_ORIGINS="app.website.com" # Comma separated list of allowed origins
+COOKIE_DOMAIN=".website.com" # Domain to set cookies on
+AUTH_REDIRECT_URL="https://localhost.website.com" # URL to redirect to after successful login
+AUTH_SECRET="" # 32 characters long secret key for JWT signing and verification
+AUTH_GITHUB_CLIENT_ID="" # GitHub OAuth client ID
+AUTH_GITHUB_CLIENT_SECRET="" # GitHub OAuth client secret
+AUTH_SESSION_EXPIRATION_MS=86400000 # 24 hours
+
+[env.production.vars]
+ENVIROMENT="production"
+
+[[d1_databases]]
+binding = "D1Database"
+database_name = "d1-database"
+database_id = ""
+
+[[kv_namespaces]]
+binding = "KVstore"
+id = ""

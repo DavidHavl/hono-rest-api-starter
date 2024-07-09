@@ -28,12 +28,11 @@
     "node": ">=20.10.0"
   },
   "dependencies": {
-    "@auth/core": "^0.34.1",
-    "@hono/auth-js": "^1.0.10",
     "@hono/swagger-ui": "^0.3.0",
     "@hono/zod-openapi": "^0.14.7",
     "@hono/zod-validator": "^0.2.2",
     "@paralleldrive/cuid2": "^2.2.2",
+    "arctic": "2.0.0-next.1",
     "drizzle-orm": "^0.31.2",
     "drizzle-zod": "^0.5.1",
     "hono": "^4.4.11",

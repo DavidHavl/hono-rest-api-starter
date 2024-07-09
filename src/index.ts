@@ -95,6 +95,7 @@ app.onError((err, c) => {
     // Get the custom response
     return err.getResponse();
   }
+  // TODO: log to logger and return generic error message with error identifier
   return c.json(err, { status: 500 });
 });
 

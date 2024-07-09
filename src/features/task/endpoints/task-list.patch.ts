@@ -1,5 +1,5 @@
 import { emitter } from '@/events';
-import { getCurentUser } from '@/features/auth/utils';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
@@ -105,7 +105,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
   const input = c.req.valid('form');
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');

@@ -1,4 +1,4 @@
-import { getCurentUser } from '@/features/auth/utils';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { SuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
@@ -114,7 +114,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const params = c.req.valid('param');
   const query = c.req.valid('query');
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     // Unauthorized

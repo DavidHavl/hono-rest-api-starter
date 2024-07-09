@@ -1,7 +1,4 @@
-import { getCurentUser } from '@/features/auth/utils';
-import { ProjectSchema } from '@/features/project/models/project.schema';
-import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
-import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { createCollectionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -13,7 +10,6 @@ import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
 import { eq, inArray } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-zod';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
@@ -75,7 +71,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
   const { fields } = query;
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');

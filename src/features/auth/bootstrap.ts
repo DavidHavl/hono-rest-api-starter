@@ -1,13 +1,17 @@
+import { callbackHandler, signinHandler } from '@/features/auth/endpoints/github';
+import { handler as signoutHandler } from '@/features/auth/endpoints/signout.post';
 import { authGuard } from '@/features/auth/guards/auth.guard';
 import type { Env } from '@/types';
-import { authHandler, initAuthConfig } from '@hono/auth-js';
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { getAuthConfig } from './auth.config';
 
 export default function (app: OpenAPIHono<Env>) {
-  app.use('/*', initAuthConfig(getAuthConfig)); // Add auth config to context (under "authConfig" key) for all routes
+  // Add OAuth routes
+  app.post('/auth/github', signinHandler);
+  app.post('/auth/github/callback', callbackHandler);
 
-  app.use('/auth/*', authHandler()); // Add handlers for auth/signin, auth/signout, and auth/callback routes
+  // Add other auth routes
+  app.post('auth/signout', signoutHandler);
 
+  // Add auth guards
   app.use('/*', authGuard({ excludePaths: ['/', '/docs'] })); // Add auth guards for all routes that need it
 }

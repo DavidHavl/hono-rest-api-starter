@@ -1,11 +1,9 @@
-import { getCurentUser } from '@/features/auth/utils';
+import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
-import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
 import { createCollectionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamMemberSchema } from '@/features/team/models/team-member.schema';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import { UserSchema } from '@/features/user/models/user.schema';
 import type { User } from '@/features/user/models/user.type';
 import { UsersTable } from '@/features/user/models/users.table';
 import type { Env } from '@/types';
@@ -76,7 +74,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
   const { fields, include, teamId } = query;
-  const user = getCurentUser(c);
+  const user = await getCurentUser(c);
 
   if (!user) {
     // Unauthorized
