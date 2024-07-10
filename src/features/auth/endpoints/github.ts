@@ -78,20 +78,28 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
     const githubUserResponse = await fetch('https://api.github.com/user', {
       headers: {
         Authorization: `Bearer ${tokens.accessToken()}`,
+        'User-Agent': `${c.env.PROJECT_NAME} client`,
       },
     });
     const githubUser = (await githubUserResponse.json()) as GitHubUser;
-    // Get user email from GitHub
-    const emailResponse = await fetch('https://api.github.com/user/emails', {
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken()}`,
-      },
-    });
-    const emails = (await emailResponse.json()) as { email: string; primary: boolean; verified: boolean }[];
-    const email = emails.find((e) => e.primary && e.verified)?.email;
 
     if (!githubUser?.id) {
       return unauthorizedResponse(c);
+    }
+
+    // Get user email from GitHub if public one in user info is not present
+    if (!githubUser.email) {
+      const emailResponse = await fetch('https://api.github.com/user/emails', {
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken()}`,
+          'User-Agent': `${c.env.PROJECT_NAME} client`,
+        },
+      });
+      const emails = (await emailResponse.json()) as { email: string; primary: boolean; verified: boolean }[];
+      const email = emails.find((e) => e.primary && e.verified)?.email;
+      if (email) {
+        githubUser.email = email;
+      }
     }
 
     // Get user from DB
@@ -120,7 +128,7 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
         .where(eq(UsersTable.githubId, githubUser.id));
     }
     // If email is not set in GitHub account or is not verified or public, return error
-    else if (!email) {
+    else if (!githubUser.email) {
       return unauthorizedResponse(
         c,
         'A github account with public and verified email is required to create an account!',

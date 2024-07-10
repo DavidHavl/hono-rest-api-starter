@@ -6,6 +6,7 @@ route={ pattern = "", zone_name = "", custom_domain = true }
 
 [vars]
 ENVIROMENT="development" # Environment name
+PROJECT_NAME="hono-api-starter" # Project name
 CORS_ORIGINS="app.website.com" # Comma separated list of allowed origins
 COOKIE_DOMAIN=".website.com" # Domain to set cookies on
 AUTH_REDIRECT_URL="https://localhost.website.com" # URL to redirect to after successful login

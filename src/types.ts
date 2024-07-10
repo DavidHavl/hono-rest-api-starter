@@ -6,6 +6,7 @@ import type { Emitter } from 'hono-event-emitter';
 export type Env = {
   Bindings: {
     ENVIRONMENT: string;
+    PROJECT_NAME: string;
     CORS_ORIGINS: string;
     COOKIE_DOMAIN: string;
     AUTH_REDIRECT_URL: string;

@@ -6,8 +6,8 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 
 export default function (app: OpenAPIHono<Env>) {
   // Add OAuth routes
-  app.post('/auth/github', signinHandler);
-  app.post('/auth/github/callback', callbackHandler);
+  app.get('/auth/github', signinHandler);
+  app.get('/auth/github/callback', callbackHandler);
 
   // Add other auth routes
   app.post('auth/signout', signoutHandler);
