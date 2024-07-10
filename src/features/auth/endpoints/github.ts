@@ -138,7 +138,7 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
       const result: User[] = await db
         .insert(UsersTable)
         .values({
-          githubId: githubUser.id,
+          githubId: String(githubUser.id),
           username: githubUser.login,
           email: githubUser.email,
           fullName: githubUser.name,
