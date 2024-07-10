@@ -15,8 +15,8 @@ export type Env = {
     AUTH_GITHUB_CLIENT_SECRET: string;
     AUTH_SESSION_EXPIRATION_MS: number;
     BASE_URL: string;
-    D1Database: D1Database;
-    KVstore: KVNamespace;
+    D1: D1Database;
+    KV: KVNamespace;
   };
   Variables: {
     db: DrizzleD1Database;

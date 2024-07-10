@@ -13,7 +13,7 @@ export const userCreatedEventHandler = defineHandler<EmitterEvents, 'user.create
       ownerId: user.id,
     })
     .returning();
-  emitter.emit('team.created', c, { team: inserted[0] });
+  await emitter.emit('team.created', c, { team: inserted[0] });
 });
 
 export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.created', Env>(async (c, { team }) => {
@@ -24,8 +24,8 @@ export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.create
       userId: team.ownerId,
       teamId: team.id,
       hasUserAccepted: true,
-      hasResourceAccepted: true,
+      hasTeamAccepted: true,
     })
     .returning();
-  emitter.emit('team-member.created', c, { teamMember: inserted[0] });
+  await emitter.emit('team-member.created', c, { teamMember: inserted[0] });
 });

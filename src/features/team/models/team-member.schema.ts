@@ -32,7 +32,7 @@ export const TeamMemberSchema = z
       userId: 'kser4623wjyidygs7qn',
       teamId: 'k23wjser46yidy7qngs',
       hasUserAccepted: true,
-      hasResourceAccepted: true,
+      hasTeamAccepted: true,
       createdAt: '2024-04-19T14:37:58.000Z',
       updatedAt: '2024-04-19T14:37:58.000Z',
     },

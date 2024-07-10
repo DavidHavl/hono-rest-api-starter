@@ -19,10 +19,10 @@ AUTH_SESSION_EXPIRATION_MS=86400000 # 24 hours
 ENVIROMENT="production"
 
 [[d1_databases]]
-binding = "D1Database"
+binding = "DB"
 database_name = "d1-database"
 database_id = ""
 
 [[kv_namespaces]]
-binding = "KVstore"
+binding = "KV"
 id = ""

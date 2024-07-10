@@ -125,7 +125,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       and(
         eq(TeamMembersTable.teamId, found[0].teamId),
         eq(TeamMembersTable.userId, user.id),
-        eq(TeamMembersTable.hasResourceAccepted, true),
+        eq(TeamMembersTable.hasTeamAccepted, true),
         eq(TeamMembersTable.hasUserAccepted, true),
       ),
     );
@@ -167,7 +167,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .returning();
 
   // Emit event
-  emitter.emit('task.updated', c, { task: result[0] });
+  await emitter.emit('task.updated', c, { task: result[0] });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

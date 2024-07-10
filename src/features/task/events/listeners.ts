@@ -15,6 +15,6 @@ export const projectCreatedEventHandler = defineHandler<EmitterEvents, 'project.
         teamId: project.teamId,
       })
       .returning();
-    emitter.emit('task-list.created', c, { taskList: inserted[0] });
+    await emitter.emit('task-list.created', c, { taskList: inserted[0] });
   },
 );

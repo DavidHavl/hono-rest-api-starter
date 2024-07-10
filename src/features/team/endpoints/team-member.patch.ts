@@ -140,7 +140,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
 
   // Refine data based on authorization
   if (team.ownerId !== user.id) {
-    validatedData.hasResourceAccepted = undefined;
+    validatedData.hasTeamAccepted = undefined;
   }
   if (teamMember.userId !== user.id) {
     validatedData.hasUserAccepted = undefined;
@@ -156,7 +156,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Emit event
-  emitter.emit('team-member.updated', c, { teamMember });
+  await emitter.emit('team-member.updated', c, { teamMember });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

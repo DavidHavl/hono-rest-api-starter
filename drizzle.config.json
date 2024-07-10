@@ -1,9 +1,11 @@
 {
+  "verbose": true,
   "dialect": "sqlite",
   "driver": "d1",
   "dbCredentials": {
     "wranglerConfigPath": "wrangler.toml",
-    "dbName": "d1-dev"
+    "dbName": "d1-dev",
+    "bindingName": "D1"
   },
   "out": "migrations",
   "schema": "./src/**/*.table.ts"

@@ -139,12 +139,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
         // Specifying one by one because of DrizzleORM bug preventing from using `...validatedData` directly
         teamId: validatedData.teamId,
         userId,
-        hasResourceAccepted: true,
+        hasTeamAccepted: true,
       })
       .returning();
 
     // Emit event
-    emitter.emit('team-member.created', c, { teamMember: result[0] });
+    await emitter.emit('team-member.created', c, { teamMember: result[0] });
   }
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

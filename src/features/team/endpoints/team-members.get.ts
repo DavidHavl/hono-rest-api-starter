@@ -87,8 +87,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   if (
     teamMemberResult.length === 0 ||
     !teamMemberResult.some(
-      (teamMember) =>
-        teamMember.userId === user.id /*&& teamMember.hasUserAccepted && teamMember.hasResourceAccepted,*/,
+      (teamMember) => teamMember.userId === user.id /*&& teamMember.hasUserAccepted && teamMember.hasTeamAccepted,*/,
     )
   ) {
     return unauthorizedResponse(c, 'Not a member of given team');

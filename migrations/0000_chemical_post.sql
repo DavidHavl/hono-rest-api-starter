@@ -38,7 +38,7 @@ CREATE TABLE `team-members` (
 	`userId` text NOT NULL,
 	`teamId` text NOT NULL,
 	`hasUserAccepted` integer DEFAULT false,
-	`hasResourceAccepted` integer DEFAULT false,
+	`hasTeamAccepted` integer DEFAULT false,
 	`createdAt` integer,
 	`updatedAt` integer
 );

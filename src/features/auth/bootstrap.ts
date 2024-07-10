@@ -10,7 +10,7 @@ export default function (app: OpenAPIHono<Env>) {
   app.get('/auth/github/callback', callbackHandler);
 
   // Add other auth routes
-  app.post('auth/signout', signoutHandler);
+  app.post('/auth/signout', signoutHandler);
 
   // Add auth guards
   app.use('/*', authGuard({ excludePaths: ['/', '/docs'] })); // Add auth guards for all routes that need it
