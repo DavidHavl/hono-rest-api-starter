@@ -1,4 +1,3 @@
-import type { TeamSchema } from '@/features/team/models/team.schema';
-import type { z } from '@hono/zod-openapi';
+import type { TeamsTable } from '@/features/team/models/teams.table';
 
-export type Team = z.infer<typeof TeamSchema>;
+export type Team = typeof TeamsTable.$inferSelect;

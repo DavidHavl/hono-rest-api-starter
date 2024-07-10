@@ -1,4 +1,3 @@
-import type { ProjectSchema } from '@/features/project/models/project.schema';
-import type { z } from '@hono/zod-openapi';
+import type { ProjectsTable } from '@/features/project/models/projects.table';
 
-export type Project = z.infer<typeof ProjectSchema>;
+export type Project = typeof ProjectsTable.$inferSelect;

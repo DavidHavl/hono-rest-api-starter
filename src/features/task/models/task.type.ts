@@ -1,4 +1,3 @@
-import type { TaskSchema } from '@/features/task/models/task.schema';
-import type { z } from '@hono/zod-openapi';
+import type { TasksTable } from '@/features/task/models/tasks.table';
 
-export type Task = z.infer<typeof TaskSchema>;
+export type Task = typeof TasksTable.$inferSelect;

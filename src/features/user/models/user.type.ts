@@ -1,4 +1,3 @@
-import type { UserSchema } from '@/features/user/models/user.schema';
-import type { z } from '@hono/zod-openapi';
+import type { UsersTable } from '@/features/user/models/users.table';
 
-export type User = z.infer<typeof UserSchema>;
+export type User = typeof UsersTable.$inferSelect;

@@ -1,4 +1,3 @@
-import type { TaskListSchema } from '@/features/task/models/task-list.schema';
-import type { z } from '@hono/zod-openapi';
+import type { TaskListsTable } from '@/features/task/models/task-lists.table';
 
-export type TaskList = z.infer<typeof TaskListSchema>;
+export type TaskList = typeof TaskListsTable.$inferSelect;
