@@ -10,7 +10,7 @@ import type { Env } from '@/types';
 import { OAuth2RequestError, generateState } from 'arctic';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
-import { getCookie, setCookie } from 'hono/cookie';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { sign } from 'hono/jwt';
 import { z } from 'zod';
 
@@ -33,7 +33,7 @@ export const signinHandler = async (c: Context<Env, 'auth/github'>) => {
   const github = useGithubProvider(
     c.env.AUTH_GITHUB_CLIENT_ID,
     c.env.AUTH_GITHUB_CLIENT_SECRET,
-    c.env.AUTH_REDIRECT_URL,
+    c.env.AUTH_CALLBACK_URL,
   );
   // Generate state (ramdom string to prevent CSRF attacks)
   const state = generateState();
@@ -60,6 +60,8 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
   const state = c.req.query('state')?.toString() ?? null;
   // Get stored state from cookie (to prevent CSRF attacks)
   const storedState = getCookie(c).github_oauth_state ?? null;
+  // Delete state cookie
+  deleteCookie(c, 'github_oauth_state');
   // Check state and code are present and valid
   if (!code || !state || !storedState || state !== storedState) {
     return badRequestResponse(c, 'Invalid state or code', 'Invalid state or code');
@@ -69,7 +71,7 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
   const github = useGithubProvider(
     c.env.AUTH_GITHUB_CLIENT_ID,
     c.env.AUTH_GITHUB_CLIENT_SECRET,
-    c.env.AUTH_REDIRECT_URL,
+    c.env.AUTH_CALLBACK_URL,
   );
 
   try {
@@ -164,6 +166,8 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
       maxAge: 60 * 10,
       sameSite: 'Lax',
     });
+    // Return success
+    return c.redirect(c.env.AUTH_REDIRECT_URL);
   } catch (e) {
     if (e instanceof OAuth2RequestError && e.code === 'bad_verification_code') {
       // invalid code
