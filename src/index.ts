@@ -1,6 +1,7 @@
 import { bootstrapFeatures } from '@/features/bootstrap';
 import { notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { dbMiddleware } from '@/middleware/db.middleware';
+import { kvMiddleware } from '@/middleware/kv.middleware';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
@@ -43,6 +44,9 @@ app.use((c, next) => {
 
 // DB //
 app.use(dbMiddleware);
+
+// KV //
+app.use(kvMiddleware);
 
 // CACHE //
 // app.get(

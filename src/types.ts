@@ -10,12 +10,13 @@ export type Env = {
     CORS_ORIGINS: string;
     COOKIE_DOMAIN: string;
     AUTH_REDIRECT_URL: string;
+    AUTH_CALLBACK_URL: string;
     AUTH_SECRET: string;
     AUTH_GITHUB_CLIENT_ID: string;
     AUTH_GITHUB_CLIENT_SECRET: string;
     AUTH_SESSION_EXPIRATION_MS: number;
     BASE_URL: string;
-    D1: D1Database;
+    DB: D1Database;
     KV: KVNamespace;
   };
   Variables: {
