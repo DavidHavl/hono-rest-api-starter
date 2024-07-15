@@ -22,7 +22,7 @@ const entityType = 'tasks';
 const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
-  include: z.enum(['asignee']).optional(),
+  include: z.enum(['assignee']).optional(),
   listId: z.string().optional().openapi({ example: '123456789' }),
   teamId: z.string().optional().openapi({ example: '123456789' }),
 });
@@ -148,12 +148,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Include assignee details if requested
-  const includeAsignees = include === 'asignee';
-  let asignees = [];
+  const includeAsignees = include === 'assignee';
+  let assignees = [];
   if (includeAsignees) {
-    const userIds = result.map((task) => task.asigneeId).filter(Boolean);
+    const userIds = result.map((task) => task.assigneeId).filter(Boolean);
     if (userIds.length > 0) {
-      asignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+      assignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
     }
   }
 
@@ -165,10 +165,10 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       attributes: fields ? pickObjectProperties(task, fields.split(',')) : task,
       relationships: {
         user:
-          includeAsignees && asignees.length > 0
+          includeAsignees && assignees.length > 0
             ? {
                 data: {
-                  id: task.asigneeId,
+                  id: task.assigneeId,
                   type: 'users',
                 },
               }
@@ -179,16 +179,16 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       },
     })),
     included:
-      includeAsignees && asignees.length > 0
-        ? asignees.map((asignee) => ({
-            id: asignee.id,
+      includeAsignees && assignees.length > 0
+        ? assignees.map((assignee) => ({
+            id: assignee.id,
             type: 'users',
             attributes: {
-              id: asignee.id,
-              fullName: asignee.fullName,
+              id: assignee.id,
+              fullName: assignee.fullName,
             },
             links: {
-              self: `${origin}/users/${asignee.id}`,
+              self: `${origin}/users/${assignee.id}`,
             },
           }))
         : undefined,
