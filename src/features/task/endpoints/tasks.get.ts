@@ -148,7 +148,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Include assignee details if requested
-  const includeAsignees = include === 'assignee';
+  const includeAsignees = include === 'asignee';
   let asignees = [];
   if (includeAsignees) {
     const userIds = result.map((task) => task.asigneeId);
