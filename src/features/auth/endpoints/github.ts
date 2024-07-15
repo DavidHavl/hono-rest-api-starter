@@ -163,7 +163,7 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
       path: '/',
       secure: c.env.ENVIRONMENT === 'production',
       httpOnly: true,
-      maxAge: 60 * 10,
+      expires: expiresAt,
       sameSite: 'Lax',
     });
     // Return success
