@@ -152,7 +152,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   let asignees = [];
   if (includeAsignees) {
     const userIds = result.map((task) => task.asigneeId);
-    asignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+    if (userIds.length > 0) {
+      asignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+    }
   }
 
   // Return response
@@ -162,32 +164,34 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       type: entityType,
       attributes: fields ? pickObjectProperties(task, fields.split(',')) : task,
       relationships: {
-        user: includeAsignees
-          ? {
-              data: {
-                id: task.asigneeId,
-                type: 'users',
-              },
-            }
-          : undefined,
+        user:
+          includeAsignees && asignees.length > 0
+            ? {
+                data: {
+                  id: task.asigneeId,
+                  type: 'users',
+                },
+              }
+            : undefined,
       },
       links: {
         self: `${origin}/${entityType}/${task.id}`,
       },
     })),
-    included: includeAsignees
-      ? asignees.map((asignee) => ({
-          id: asignee.id,
-          type: 'users',
-          attributes: {
+    included:
+      includeAsignees && asignees.length > 0
+        ? asignees.map((asignee) => ({
             id: asignee.id,
-            fullName: asignee.fullName,
-          },
-          links: {
-            self: `${origin}/users/${asignee.id}`,
-          },
-        }))
-      : undefined,
+            type: 'users',
+            attributes: {
+              id: asignee.id,
+              fullName: asignee.fullName,
+            },
+            links: {
+              self: `${origin}/users/${asignee.id}`,
+            },
+          }))
+        : undefined,
     links: {
       self: `${origin}/${entityType}${buildUrlQueryString(query)}`,
     },
