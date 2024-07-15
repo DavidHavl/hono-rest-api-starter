@@ -22,8 +22,8 @@ const entityType = 'tasks';
 const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
-  include: z.string().optional().openapi({ example: 'assignee' }),
-  listId: z.string().openapi({ example: '123456789' }),
+  include: z.enum(['asignee']).optional(),
+  listId: z.string().optional().openapi({ example: '123456789' }),
   teamId: z.string().optional().openapi({ example: '123456789' }),
 });
 
@@ -175,15 +175,6 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
         self: `${origin}/${entityType}/${task.id}`,
       },
     })),
-    // id: asigneeMap[`user_${task.asigneeId}`].id,
-    //                   type: 'users',
-    //                   attributes: {
-    //                     id: asigneeMap[`user_${task.asigneeId}`].id,
-    //                     fullName: asigneeMap[`user_${task.asigneeId}`].fullName,
-    //                   },
-    //                 links: {
-    //                   self: `${origin}/users/${asigneeMap[`user_${task.asigneeId}`].id}`,
-    //                 },
     included: includeAsignees
       ? asignees.map((asignee) => ({
           id: asignee.id,
