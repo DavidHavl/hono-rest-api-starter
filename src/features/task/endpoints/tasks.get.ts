@@ -44,6 +44,22 @@ const ResponseSchema = CollectionSuccessResponseSchema.merge(
           example: entityType,
         }),
         attributes: TaskSchema,
+        relationships: z
+          .object({
+            assignee: z
+              .object({
+                data: z.object({
+                  id: z.string().openapi({
+                    example: 'thgbw45brtb4rt5676uh',
+                  }),
+                  type: z.string().openapi({
+                    example: 'users',
+                  }),
+                }),
+              })
+              .optional(),
+          })
+          .optional(),
         links: z.object({
           self: z
             .string()
@@ -51,6 +67,29 @@ const ResponseSchema = CollectionSuccessResponseSchema.merge(
             .openapi({
               example: `https://api.website.com/${entityType}/thgbw45brtb4rt5676uh`,
             }),
+        }),
+      }),
+    ),
+    included: z.array(
+      z.object({
+        id: z.string().openapi({
+          example: 'thgbw45brtb4rt5676uh',
+        }),
+        type: z.string().openapi({
+          example: 'users',
+        }),
+        attributes: z.object({
+          id: z.string().openapi({
+            example: 'thgbw45brtb4rt5676uh',
+          }),
+          fullName: z.string().openapi({
+            example: 'John Doe',
+          }),
+        }),
+        links: z.object({
+          self: z.string().url().openapi({
+            example: 'https://api.website.com/users/thgbw45brtb4rt5676uh',
+          }),
         }),
       }),
     ),
