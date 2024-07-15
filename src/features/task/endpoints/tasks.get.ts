@@ -151,7 +151,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const includeAsignees = include === 'asignee';
   let asignees = [];
   if (includeAsignees) {
-    const userIds = result.map((task) => task.asigneeId);
+    const userIds = result.map((task) => task.asigneeId).filter(Boolean);
     if (userIds.length > 0) {
       asignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
     }
