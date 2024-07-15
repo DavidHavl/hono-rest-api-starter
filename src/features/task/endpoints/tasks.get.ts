@@ -164,7 +164,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       type: entityType,
       attributes: fields ? pickObjectProperties(task, fields.split(',')) : task,
       relationships: {
-        user:
+        assignee:
           includeAsignees && assignees.length > 0
             ? {
                 data: {
