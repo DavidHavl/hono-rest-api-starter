@@ -14,7 +14,7 @@ export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.create
         teamId: team.id,
       })
       .returning();
-    await emitter.emit('project.created', c, { project: inserted[0] });
+    await emitter.emit('project:created', c, { project: inserted[0] });
   } catch (e) {
     console.error('Error creating project', e);
   }

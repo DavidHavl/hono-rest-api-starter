@@ -36,7 +36,7 @@
     "drizzle-orm": "^0.31.4",
     "drizzle-zod": "^0.5.1",
     "hono": "^4.4.12",
-    "hono-event-emitter": "^2.0.0",
+    "hono-event-emitter": "^3.0.1",
     "nanoid": "^5.0.7",
     "zod": "^3.23.8"
   }

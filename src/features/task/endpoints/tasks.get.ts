@@ -1,6 +1,7 @@
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { CollectionSuccessResponseSchema } from '@/features/shared/models/success-respone.schema';
+import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
@@ -21,6 +22,7 @@ const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
   listId: z.string().openapi({ example: '123456789' }),
+  teamId: z.string().optional().openapi({ example: '123456789' }),
 });
 
 interface RequestValidationTargets {
@@ -102,7 +104,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const { fields, listId } = query;
+  const { fields, listId, teamId } = query;
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -110,23 +112,38 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c);
   }
 
-  const taskListResult = await db.select().from(TaskListsTable).where(eq(TaskListsTable.id, listId));
-
-  if (taskListResult.length === 0) {
-    return notFoundResponse(c, 'Task list not found');
+  let teamIdToCheck = '';
+  if (listId) {
+    // Check if the task list exists
+    const taskListResult = await db.select().from(TaskListsTable).where(eq(TaskListsTable.id, listId));
+    if (taskListResult.length === 0) {
+      return notFoundResponse(c, 'Task list not found');
+    }
+    teamIdToCheck = taskListResult[0].teamId;
+  } else if (teamId) {
+    teamIdToCheck = teamId;
+  } else {
+    return badRequestResponse(c, 'Either listId or teamId must be provided');
   }
 
+  // Authorization
   const teamMemberResult = await db
     .select()
     .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, taskListResult[0].teamId), eq(TeamMembersTable.userId, user.id)));
+    .where(and(eq(TeamMembersTable.teamId, teamIdToCheck), eq(TeamMembersTable.userId, user.id)));
 
   // Check if user is a member of the team
   if (teamMemberResult.length === 0) {
-    return unauthorizedResponse(c);
+    return unauthorizedResponse(c, 'You are not a member of the requested team');
   }
 
-  const result = await db.select().from(TasksTable).where(eq(TasksTable.listId, listId));
+  // Fetch tasks
+  let result = [];
+  if (listId) {
+    result = await db.select().from(TasksTable).where(eq(TasksTable.listId, listId));
+  } else {
+    result = await db.select().from(TasksTable).where(eq(TasksTable.teamId, teamIdToCheck));
+  }
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: result.map((task) => ({

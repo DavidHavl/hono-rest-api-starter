@@ -156,7 +156,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Emit event
-  await emitter.emit('team-member.updated', c, { teamMember });
+  await emitter.emit('team-member:updated', c, { teamMember });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

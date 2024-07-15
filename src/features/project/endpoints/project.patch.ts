@@ -104,7 +104,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
-  const input = c.req.valid('form');
+  const input = await c.req.json();
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -139,7 +139,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .returning();
 
   // Emit event
-  await emitter.emit('project.updated', c, { project: result[0] });
+  await emitter.emit('project:updated', c, { project: result[0] });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

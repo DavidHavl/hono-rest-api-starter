@@ -8,7 +8,6 @@ import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/sha
 import { CreateTaskListSchema, TaskListSchema } from '@/features/task/models/task-list.schema';
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
-import { TeamsTable } from '@/features/team/models/teams.table';
 import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
@@ -111,7 +110,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const projectResult = await db
     .select()
     .from(ProjectsTable)
-    .where(and(eq(ProjectsTable.id, validatedData.projectId), eq(TeamsTable.ownerId, user.id)));
+    .where(and(eq(ProjectsTable.id, validatedData.projectId), eq(ProjectsTable.ownerId, user.id)));
 
   // Authorization
   if (projectResult.length === 0) {
@@ -149,7 +148,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .returning();
 
   // Emit event
-  await emitter.emit('task-list.created', c, { taskList: result[0] });
+  await emitter.emit('task-list:created', c, { taskList: result[0] });
 
   // Response
   return c.json<z.infer<typeof ResponseSchema>, 200>({

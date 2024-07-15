@@ -17,5 +17,5 @@ export default function (app: OpenAPIHono<Env>) {
   app.openapi(patchProjectRoute, patchProjectHandler);
 
   // Register event listeners
-  emitter.on('team.created', teamCreatedEventHandler);
+  emitter.on('team:created', teamCreatedEventHandler);
 }

@@ -37,6 +37,6 @@ export default function (app: OpenAPIHono<Env>) {
   app.openapi(patchTeamMemberRoute, patchTeamMemberHandler);
   app.openapi(deleteTeamMemberRoute, deleteTeamMemberHandler);
   // Subscribe to events
-  emitter.on('team.created', teamCreatedEventHandler);
-  emitter.on('user.created', userCreatedEventHandler);
+  emitter.on('team:created', teamCreatedEventHandler);
+  emitter.on('user:created', userCreatedEventHandler);
 }

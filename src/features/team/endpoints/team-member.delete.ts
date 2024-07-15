@@ -112,7 +112,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   await db.delete(TeamMembersTable).where(eq(TeamMembersTable.id, id));
 
   // Emit event
-  await emitter.emit('team-member.deleted', c, { teamMemberId: id });
+  await emitter.emit('team-member:deleted', c, { teamMemberId: id });
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: {

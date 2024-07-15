@@ -7,20 +7,20 @@ import type { User } from '@/features/user/models/user.type';
 import { createEmitter } from 'hono-event-emitter';
 
 export type EmitterEvents = {
-  'user.created': { user: User };
-  'team.created': { team: Team };
-  'team-member.created': { teamMember: TeamMember };
-  'team-member.updated': { teamMember: TeamMember };
-  'team-member.deleted': { teamMemberId: string };
-  'project.created': { project: Project };
-  'project.updated': { project: Project };
-  'project.deleted': { projectId: string };
-  'task-list.created': { taskList: TaskList };
-  'task-list.updated': { taskList: TaskList };
-  'task-list.deleted': { taskListId: string };
-  'task.created': { task: Task };
-  'task.updated': { task: Task };
-  'task.deleted': { taskId: string };
+  'user:created': { user: User };
+  'team:created': { team: Team };
+  'team-member:created': { teamMember: TeamMember };
+  'team-member:updated': { teamMember: TeamMember };
+  'team-member:deleted': { teamMemberId: string };
+  'project:created': { project: Project };
+  'project:updated': { project: Project };
+  'project:deleted': { projectId: string };
+  'task-list:created': { taskList: TaskList };
+  'task-list:updated': { taskList: TaskList };
+  'task-list:deleted': { taskListId: string };
+  'task:created': { task: Task };
+  'task:updated': { task: Task };
+  'task:deleted': { taskId: string };
 };
 
 export const emitter = createEmitter<EmitterEvents>();

@@ -117,7 +117,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   await db.delete(TasksTable).where(eq(TasksTable.id, id));
 
   // Emit event
-  await emitter.emit('task.deleted', c, { taskId: id });
+  await emitter.emit('task:deleted', c, { taskId: id });
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: {

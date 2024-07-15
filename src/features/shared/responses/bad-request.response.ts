@@ -1,7 +1,5 @@
 import { z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import { s } from 'vitest/dist/reporters-yx5ZTtEV';
-import { ZodIssue, string } from 'zod';
 
 export const ErrorResponseSchema = z.object({
   errors: z.array(
@@ -49,7 +47,7 @@ export const ErrorResponseSchema = z.object({
 export const badRequestResponse = (
   c: Context,
   message: string,
-  details: string,
+  details?: string,
   meta?: Record<string, unknown>,
   source?: { pointer?: string; parameter?: string; header?: string },
 ) => {
@@ -61,9 +59,9 @@ export const badRequestResponse = (
         status: 400,
         code: 'BAD_REQUEST',
         title: message,
-        details: details,
-        meta,
-        source,
+        details: details ?? 'There was an error while processing the request',
+        meta: meta ?? {},
+        source: source ?? {},
         links: {
           about: `https://${url.origin}/docs/errors/BAD_REQUEST`,
           type: `https://${url.origin}/docs/errors`,

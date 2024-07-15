@@ -25,5 +25,5 @@ export default function (app: OpenAPIHono<Env>) {
   app.openapi(deleteTaskListsRoute, deleteTaskListHandler);
 
   // Subscribe to events
-  emitter.on('project.created', projectCreatedEventHandler);
+  emitter.on('project:created', projectCreatedEventHandler);
 }
