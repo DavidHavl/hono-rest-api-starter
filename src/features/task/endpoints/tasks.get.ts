@@ -8,11 +8,12 @@ import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import { TaskSchema } from '@/features/task/models/task.schema';
 import { TasksTable } from '@/features/task/models/tasks.table';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
+import { UsersTable } from '@/features/user/models/users.table';
 import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'tasks';
@@ -21,6 +22,7 @@ const entityType = 'tasks';
 const fieldKeys = Object.keys(TaskSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
+  include: z.string().optional().openapi({ example: 'assignee' }),
   listId: z.string().openapi({ example: '123456789' }),
   teamId: z.string().optional().openapi({ example: '123456789' }),
 });
@@ -104,7 +106,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const { fields, listId, teamId } = query;
+  const { fields, include, listId, teamId } = query;
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -145,15 +147,56 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     result = await db.select().from(TasksTable).where(eq(TasksTable.teamId, teamIdToCheck));
   }
 
+  // Include assignee details if requested
+  const includeAsignees = include === 'assignee';
+  let asignees = [];
+  if (includeAsignees) {
+    const userIds = result.map((task) => task.asigneeId);
+    asignees = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+  }
+
+  // Return response
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: result.map((task) => ({
       id: task.id,
       type: entityType,
       attributes: fields ? pickObjectProperties(task, fields.split(',')) : task,
+      relationships: {
+        user: includeAsignees
+          ? {
+              data: {
+                id: task.asigneeId,
+                type: 'users',
+              },
+            }
+          : undefined,
+      },
       links: {
         self: `${origin}/${entityType}/${task.id}`,
       },
     })),
+    // id: asigneeMap[`user_${task.asigneeId}`].id,
+    //                   type: 'users',
+    //                   attributes: {
+    //                     id: asigneeMap[`user_${task.asigneeId}`].id,
+    //                     fullName: asigneeMap[`user_${task.asigneeId}`].fullName,
+    //                   },
+    //                 links: {
+    //                   self: `${origin}/users/${asigneeMap[`user_${task.asigneeId}`].id}`,
+    //                 },
+    included: includeAsignees
+      ? asignees.map((asignee) => ({
+          id: asignee.id,
+          type: 'users',
+          attributes: {
+            id: asignee.id,
+            fullName: asignee.fullName,
+          },
+          links: {
+            self: `${origin}/users/${asignee.id}`,
+          },
+        }))
+      : undefined,
     links: {
       self: `${origin}/${entityType}${buildUrlQueryString(query)}`,
     },
