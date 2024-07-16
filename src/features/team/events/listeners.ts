@@ -4,7 +4,7 @@ import { TeamsTable } from '@/features/team/models/teams.table';
 import type { Env } from '@/types';
 import { defineHandler } from 'hono-event-emitter';
 
-export const userCreatedEventHandler = defineHandler<EmitterEvents, 'user.created', Env>(async (c, { user }) => {
+export const userCreatedEventHandler = defineHandler<EmitterEvents, 'user:created', Env>(async (c, { user }) => {
   const db = c.get('db');
   const inserted = await db
     .insert(TeamsTable)
@@ -16,7 +16,7 @@ export const userCreatedEventHandler = defineHandler<EmitterEvents, 'user.create
   await emitter.emit('team:created', c, { team: inserted[0] });
 });
 
-export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.created', Env>(async (c, { team }) => {
+export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team:created', Env>(async (c, { team }) => {
   const db = c.get('db');
   const inserted = await db
     .insert(TeamMembersTable)

@@ -3,7 +3,7 @@ import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import type { Env } from '@/types';
 import { defineHandler } from 'hono-event-emitter';
 
-export const projectCreatedEventHandler = defineHandler<EmitterEvents, 'project.created', Env>(
+export const projectCreatedEventHandler = defineHandler<EmitterEvents, 'project:created', Env>(
   async (c, { project }) => {
     const db = c.get('db');
     const inserted = await db

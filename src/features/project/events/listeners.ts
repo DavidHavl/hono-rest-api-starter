@@ -3,7 +3,7 @@ import { ProjectsTable } from '@/features/project/models/projects.table';
 import type { Env } from '@/types';
 import { defineHandler } from 'hono-event-emitter';
 
-export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team.created', Env>(async (c, { team }) => {
+export const teamCreatedEventHandler = defineHandler<EmitterEvents, 'team:created', Env>(async (c, { team }) => {
   const db = c.get('db');
   try {
     const inserted = await db
