@@ -38,7 +38,7 @@ interface RequestValidationTargets {
   out: {
     param: z.infer<typeof ParamsSchema>;
     query: z.infer<typeof QuerySchema>;
-    form: z.infer<typeof UpdateProjectSchema>;
+    json: z.infer<typeof UpdateProjectSchema>;
   };
 }
 

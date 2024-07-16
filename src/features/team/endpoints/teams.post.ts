@@ -23,7 +23,7 @@ const QuerySchema = z.object({
 interface RequestValidationTargets {
   out: {
     query: z.infer<typeof QuerySchema>;
-    form: z.infer<typeof CreateTeamSchema>;
+    json: z.infer<typeof CreateTeamSchema>;
   };
 }
 
@@ -79,7 +79,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const input = c.req.valid('form');
+  const input = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {

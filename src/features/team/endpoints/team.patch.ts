@@ -37,7 +37,7 @@ interface RequestValidationTargets {
   out: {
     param: z.infer<typeof ParamsSchema>;
     query: z.infer<typeof QuerySchema>;
-    form: z.infer<typeof UpdateTeamSchema>;
+    json: z.infer<typeof UpdateTeamSchema>;
   };
 }
 
@@ -103,7 +103,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
-  const input = c.req.valid('form');
+  const input = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
