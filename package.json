@@ -14,8 +14,11 @@
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@cloudflare/workers-types": "^4.20240605.0",
+    "@miniflare/d1": "^2.14.2",
+    "@miniflare/shared": "^2.14.2",
     "@types/node": "^20.12.12",
     "@types/service-worker-mock": "^2.0.4",
+    "better-sqlite3": "^11.1.2",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.22.7",
     "vitest": "^1.6.0",
@@ -36,7 +39,7 @@
     "drizzle-orm": "^0.31.4",
     "drizzle-zod": "^0.5.1",
     "hono": "^4.4.12",
-    "hono-event-emitter": "^3.0.1",
+    "hono-event-emitter": "^3.0.2",
     "nanoid": "^5.0.7",
     "zod": "^3.23.8"
   }

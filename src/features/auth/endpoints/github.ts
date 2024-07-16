@@ -149,7 +149,7 @@ export const callbackHandler = async (c: Context<Env, 'auth/github/callback', Re
         .returning();
       user = result[0];
       // Emit event
-      await emitter.emit('user:created', c, { user });
+      await emitter.emitAsync('user:created', c, { user });
     }
 
     // Session //
