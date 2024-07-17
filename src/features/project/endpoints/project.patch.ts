@@ -2,7 +2,7 @@ import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ProjectSchema, UpdateProjectSchema } from '@/features/project/models/project.schema';
 import { ProjectsTable } from '@/features/project/models/projects.table';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -104,7 +104,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
-  const input = await c.req.json();
+  const data = await c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -121,19 +121,11 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c);
   }
 
-  // Input Validation
-  const validation = UpdateProjectSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Update in DB
   const result = await db
     .update(ProjectsTable)
     .set({
-      ...validatedData,
+      ...data,
     })
     .where(eq(ProjectsTable.id, id))
     .returning();

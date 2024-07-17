@@ -1,6 +1,6 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -91,26 +91,18 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');
   }
 
-  // Input validation
-  const validation = CreateTeamMemberSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Check if user is an owner of the specified team
   const teamResult = await db
     .select()
     .from(TeamsTable)
-    .where(and(eq(TeamsTable.id, validatedData.teamId), eq(TeamsTable.ownerId, user.id)));
+    .where(and(eq(TeamsTable.id, data.teamId), eq(TeamsTable.ownerId, user.id)));
 
   // Authorization
   if (teamResult.length === 0) {
@@ -118,7 +110,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Check if user with given email exists
-  const userResult = await db.select().from(UsersTable).where(eq(UsersTable.email, validatedData.email));
+  const userResult = await db.select().from(UsersTable).where(eq(UsersTable.email, data.email));
   if (userResult.length === 0) {
     return notFoundResponse(c, 'No user found with given email');
   }
@@ -128,7 +120,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   let result = await db
     .select()
     .from(TeamMembersTable)
-    .where(and(eq(TeamMembersTable.teamId, validatedData.teamId), eq(TeamMembersTable.userId, userId)));
+    .where(and(eq(TeamMembersTable.teamId, data.teamId), eq(TeamMembersTable.userId, userId)));
 
   // If member does not exist in team yet, create it
   if (result.length === 0) {
@@ -136,8 +128,8 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     result = await db
       .insert(TeamMembersTable)
       .values({
-        // Specifying one by one because of DrizzleORM bug preventing from using `...validatedData` directly
-        teamId: validatedData.teamId,
+        // Specifying one by one because of DrizzleORM bug preventing from using `...data` directly
+        teamId: data.teamId,
         userId,
         hasTeamAccepted: true,
       })

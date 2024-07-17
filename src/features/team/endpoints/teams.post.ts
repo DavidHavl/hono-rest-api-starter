@@ -1,6 +1,6 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { CreateTeamSchema, TeamSchema } from '@/features/team/models/team.schema';
@@ -79,27 +79,19 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');
   }
 
-  // Input validation
-  const validation = CreateTeamSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Insert into DB
   const result = await db
     .insert(TeamsTable)
     .values({
-      // Specifying one by one because of DrizzleORM bug preventing from using `...validatedData` directly
-      title: validatedData.title,
+      // Specifying one by one because of DrizzleORM bug preventing from using `...data` directly
+      title: data.title,
       ownerId: user.id,
     })
     .returning();

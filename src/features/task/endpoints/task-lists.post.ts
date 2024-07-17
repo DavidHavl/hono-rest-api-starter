@@ -1,7 +1,7 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ProjectsTable } from '@/features/project/models/projects.table';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -91,26 +91,18 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');
   }
 
-  // Input validation
-  const validation = CreateTaskListSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Check if project exists
   const projectResult = await db
     .select()
     .from(ProjectsTable)
-    .where(and(eq(ProjectsTable.id, validatedData.projectId), eq(ProjectsTable.ownerId, user.id)));
+    .where(and(eq(ProjectsTable.id, data.projectId), eq(ProjectsTable.ownerId, user.id)));
 
   // Authorization
   if (projectResult.length === 0) {
@@ -139,10 +131,10 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const result = await db
     .insert(TaskListsTable)
     .values({
-      // Specifying one by one because of DrizzleORM bug preventing from using `...validatedData` directly
-      projectId: validatedData.projectId,
+      // Specifying one by one because of DrizzleORM bug preventing from using `...data` directly
+      projectId: data.projectId,
       teamId: projectResult[0].teamId,
-      title: validatedData.title,
+      title: data.title,
       ownerId: user.id,
     })
     .returning();

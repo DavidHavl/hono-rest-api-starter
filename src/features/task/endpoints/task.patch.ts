@@ -1,9 +1,11 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import { TaskSchema, UpdateTaskSchema } from '@/features/task/models/task.schema';
 import { TasksTable } from '@/features/task/models/tasks.table';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
@@ -105,7 +107,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -132,23 +134,26 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
 
   // Authorization
   if (teamMemberResult.length === 0) {
-    return unauthorizedResponse(c);
+    return unauthorizedResponse(c, 'The given task does not belong to a team you are a member of');
   }
 
-  // Input Validation
-  const validation = UpdateTaskSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
+  // Check the list is same project as the task
+  if (data.listId) {
+    const listResult = await db.select().from(TaskListsTable).where(eq(TaskListsTable.id, data.listId));
+    if (listResult.length === 0) {
+      return notFoundResponse(c, 'Task list not found');
+    }
+    if (listResult[0].projectId !== found[0].projectId) {
+      return badRequestResponse(c, 'The new task list is not in the same project as the task');
+    }
   }
-  // Validated data
-  const validatedData = validation.data;
-
+  console.log('------ THE DATA ------:', data);
   // assign value to completedAt based on isCompleted and previous value
   let completedAt = null;
-  if (validatedData.isCompleted !== undefined) {
-    if (validatedData.isCompleted === false) {
+  if (data.isCompleted !== undefined) {
+    if (data.isCompleted === false) {
       completedAt = null; // clear the date
-    } else if (validatedData.isCompleted === true && !found[0].isCompleted) {
+    } else if (data.isCompleted === true && !found[0].isCompleted) {
       completedAt = new Date(); // set the date to now
     } else {
       completedAt = found[0].completedAt; // keep the value as is
@@ -158,9 +163,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const result = await db
     .update(TasksTable)
     .set({
-      ...validatedData,
-      dueAt: validatedData.dueAt ? new Date(Number(validatedData.dueAt)) : found[0].dueAt,
-      isCompleted: validatedData.isCompleted !== undefined ? Boolean(validatedData.isCompleted) : found[0].isCompleted,
+      ...data,
+      dueAt: data.dueAt ? new Date(Number(data.dueAt)) : found[0].dueAt,
+      isCompleted: data.isCompleted !== undefined ? Boolean(data.isCompleted) : found[0].isCompleted,
       completedAt,
     })
     .where(eq(TasksTable.id, id))

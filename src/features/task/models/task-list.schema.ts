@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 export const SelectTaskListSchema = createSelectSchema(TaskListsTable);
 export const CreateTaskListSchema = createInsertSchema(TaskListsTable, {
-  title: z.string().min(1),
+  title: z.string().min(1).trim(),
 }).omit({
   id: true,
   ownerId: true,

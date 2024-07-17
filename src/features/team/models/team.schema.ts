@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 export const SelectTeamSchema = createSelectSchema(TeamsTable);
 
 export const CreateTeamSchema = createInsertSchema(TeamsTable, {
-  title: z.string().min(1),
+  title: z.string().min(1).trim(),
 }).omit({
   id: true,
   ownerId: true,

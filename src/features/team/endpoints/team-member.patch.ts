@@ -1,6 +1,6 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -105,7 +105,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const origin = new URL(c.req.url).origin;
   const { id } = c.req.valid('param');
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
@@ -130,27 +130,19 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c);
   }
 
-  // Input Validation
-  const validation = UpdateTeamMemberSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Refine data based on authorization
   if (team.ownerId !== user.id) {
-    validatedData.hasTeamAccepted = undefined;
+    data.hasTeamAccepted = undefined;
   }
   if (teamMember.userId !== user.id) {
-    validatedData.hasUserAccepted = undefined;
+    data.hasUserAccepted = undefined;
   }
 
-  if (Object.keys(validatedData).length === 0) {
+  if (Object.keys(data).length === 0) {
     // Update in DB
     teamMember = await db
       .update(TeamMembersTable)
-      .set(filterUndefinedObjectProperties(validatedData))
+      .set(filterUndefinedObjectProperties(data))
       .where(eq(TeamMembersTable.id, id))
       .returning()[0];
   }

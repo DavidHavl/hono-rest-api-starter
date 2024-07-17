@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
+import { nanoid } from 'nanoid';
 import type { ZodIssue } from 'zod';
 
 export const InvalidInputResponseSchema = z.object({
@@ -68,6 +69,7 @@ export const invalidInputResponse = (c: Context, errors: ZodIssue[]) => {
   c.status(400);
   return c.json<z.infer<typeof InvalidInputResponseSchema>, 400>({
     errors: errors.map((issue) => ({
+      id: nanoid(),
       status: 400,
       code: 'INVALID_INPUT',
       title: 'Invalid Input',

@@ -2,7 +2,7 @@ import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { CreateProjectSchema, ProjectSchema } from '@/features/project/models/project.schema';
 import { ProjectsTable } from '@/features/project/models/projects.table';
-import { InvalidInputResponseSchema, invalidInputResponse } from '@/features/shared/responses/invalid-input.response';
+import { InvalidInputResponseSchema } from '@/features/shared/responses/invalid-input.response';
 import { createSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamsTable } from '@/features/team/models/teams.table';
@@ -81,26 +81,18 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const db = c.get('db');
   const origin = new URL(c.req.url).origin;
   const query = c.req.valid('query');
-  const input = c.req.valid('json');
+  const data = c.req.valid('json');
   const user = await getCurentUser(c);
 
   if (!user) {
     return unauthorizedResponse(c, 'No user found');
   }
 
-  // Input validation
-  const validation = CreateProjectSchema.safeParse(input);
-  if (validation.success === false) {
-    return invalidInputResponse(c, validation.error.errors);
-  }
-  // Validated data
-  const validatedData = validation.data;
-
   // Check if user is an owner of the specified team
   const teamResult = await db
     .select()
     .from(TeamsTable)
-    .where(and(eq(TeamsTable.id, validatedData.teamId), eq(TeamsTable.ownerId, user.id)));
+    .where(and(eq(TeamsTable.id, data.teamId), eq(TeamsTable.ownerId, user.id)));
 
   // Authorization
   if (teamResult.length === 0) {
@@ -112,8 +104,8 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .insert(ProjectsTable)
     .values({
       // Specifying one by one because of DrizzleORM bug preventing from using `...validatedData` directly
-      teamId: validatedData.teamId,
-      title: validatedData.title,
+      teamId: data.teamId,
+      title: data.title,
       ownerId: user.id,
     })
     .returning();
