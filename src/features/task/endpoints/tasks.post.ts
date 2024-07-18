@@ -126,18 +126,17 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   const result = await db
     .insert(TasksTable)
     .values({
+      ...data,
       // Specifying one by one because of DrizzleORM bug preventing from using `...data` directly
-      listId: data.listId,
       projectId: listResult[0].projectId,
       teamId: listResult[0].teamId,
-      title: data.title,
-      description: data.description,
       dueAt: data.dueAt ? new Date(Number(data.dueAt)) : null,
-      assigneeId: data.assigneeId,
       isCompleted: Boolean(data.isCompleted),
       completedAt: data.isCompleted ? new Date() : null,
+      position: data.position ?? 0,
       ownerId: user.id,
-    })
+      // biome-ignore lint/suspicious/noExplicitAny:  Because of drizzle-orm types bug that does not see optional fields
+    } as any)
     .returning();
 
   // Emit event

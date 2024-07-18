@@ -33,8 +33,15 @@ It is an API for project management Sass, with the following features:
 ### Migrations:
 https://orm.drizzle.team/kit-docs/commands#generate-migrations
 
+#### Local development:
+- To generate new migration: `pnpm migration:generate:local`
+- To apply migrations to the DB: `pnpm migration:migrate:local`
+
+#### Production:
+
 - To generate new migration: `pnpm migration:generate`
 - To apply migrations to the DB: `pnpm migration:migrate`
+
 
 <!--
 Dangerous: 

@@ -8,8 +8,10 @@
     "start": "wrangler dev",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "migration:generate": "drizzle-kit generate",
-    "migration:migrate": "drizzle-kit migrate"
+    "migration:generate": "drizzle-kit generate --config=drizzle.config.json",
+    "migration:generate:local": "drizzle-kit generate --config=drizzle.config.dev.json",
+    "migration:migrate": "wrangler d1 migrations apply d1-db",
+    "migration:migrate:local": "drizzle-kit migrate --config=drizzle.config.dev.json"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
@@ -20,7 +22,7 @@
     "@types/service-worker-mock": "^2.0.4",
     "better-sqlite3": "^11.1.2",
     "dotenv": "^16.4.5",
-    "drizzle-kit": "^0.22.7",
+    "drizzle-kit": "^0.23.0",
     "vitest": "^1.6.0",
     "wrangler": "^3.60.2"
   },

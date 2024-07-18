@@ -14,6 +14,7 @@ import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
 import { and, eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import type { Context } from 'hono';
 
 const entityType = 'tasks';
@@ -147,7 +148,6 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       return badRequestResponse(c, 'The new task list is not in the same project as the task');
     }
   }
-  console.log('------ THE DATA ------:', data);
   // assign value to completedAt based on isCompleted and previous value
   let completedAt = null;
   if (data.isCompleted !== undefined) {
@@ -159,6 +159,45 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       completedAt = found[0].completedAt; // keep the value as is
     }
   }
+
+  // Update position and positions of other tasks in the list
+  if (data.position && data.position !== found[0].position) {
+    const tasks = await db
+      .select()
+      .from(TasksTable)
+      .where(eq(TasksTable.listId, found[0].listId))
+      .orderBy(TasksTable.position);
+    if (tasks.length > 1) {
+      let position = data.position;
+      const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
+        // Update the task position
+        db
+          .update(TasksTable)
+          // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+          .set({ position } as any)
+          .where(eq(TasksTable.id, found[0].id)),
+      ];
+      for (const task of tasks) {
+        if (task.id === id) {
+          continue;
+        }
+        if (task.position >= data.position) {
+          position++;
+          batchQueries.push(
+            db
+              .update(TasksTable)
+              // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+              .set({ position } as any)
+              .where(eq(TasksTable.id, task.id)),
+          );
+        }
+      }
+      if (batchQueries.length) {
+        await db.batch(batchQueries);
+      }
+    }
+  }
+
   // Update in DB
   const result = await db
     .update(TasksTable)
@@ -167,7 +206,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       dueAt: data.dueAt ? new Date(Number(data.dueAt)) : found[0].dueAt,
       isCompleted: data.isCompleted !== undefined ? Boolean(data.isCompleted) : found[0].isCompleted,
       completedAt,
-    })
+      position: data.position || found[0].position,
+      // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+    } as any)
     .where(eq(TasksTable.id, id))
     .returning();
 

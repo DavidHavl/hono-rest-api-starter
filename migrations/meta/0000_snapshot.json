@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b2eaf9b2-de29-4233-b849-68751e11f17f",
+  "id": "1ddff24b-2b34-4dd7-a3ef-d36c01a16caf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "projects": {
@@ -50,8 +50,43 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "team_idx": {
+          "name": "team_idx",
+          "columns": [
+            "teamId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "projects_teamId_teams_id_fk": {
+          "name": "projects_teamId_teams_id_fk",
+          "tableFrom": "projects",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "teamId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "projects_ownerId_users_id_fk": {
+          "name": "projects_ownerId_users_id_fk",
+          "tableFrom": "projects",
+          "tableTo": "users",
+          "columnsFrom": [
+            "ownerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -93,6 +128,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -108,7 +151,22 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "project_idx": {
+          "name": "project_idx",
+          "columns": [
+            "projectId"
+          ],
+          "isUnique": false
+        },
+        "team_idx": {
+          "name": "team_idx",
+          "columns": [
+            "teamId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
@@ -179,8 +237,16 @@
           "notNull": false,
           "autoincrement": false
         },
-        "completed": {
-          "name": "completed",
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "isCompleted": {
+          "name": "isCompleted",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -192,7 +258,8 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'null'"
         },
         "createdAt": {
           "name": "createdAt",
@@ -209,8 +276,83 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "list_idx": {
+          "name": "list_idx",
+          "columns": [
+            "listId"
+          ],
+          "isUnique": false
+        },
+        "project_idx": {
+          "name": "project_idx",
+          "columns": [
+            "projectId"
+          ],
+          "isUnique": false
+        },
+        "team_idx": {
+          "name": "team_idx",
+          "columns": [
+            "teamId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tasks_projectId_projects_id_fk": {
+          "name": "tasks_projectId_projects_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "projectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tasks_listId_task-lists_id_fk": {
+          "name": "tasks_listId_task-lists_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "task-lists",
+          "columnsFrom": [
+            "listId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tasks_ownerId_users_id_fk": {
+          "name": "tasks_ownerId_users_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "ownerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tasks_assigneeId_users_id_fk": {
+          "name": "tasks_assigneeId_users_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "assigneeId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -238,16 +380,16 @@
           "notNull": true,
           "autoincrement": false
         },
-        "userAccepted": {
-          "name": "userAccepted",
+        "hasUserAccepted": {
+          "name": "hasUserAccepted",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
           "default": false
         },
-        "teamAccepted": {
-          "name": "teamAccepted",
+        "hasTeamAccepted": {
+          "name": "hasTeamAccepted",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -269,8 +411,43 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "team_idx": {
+          "name": "team_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "team-members_userId_users_id_fk": {
+          "name": "team-members_userId_users_id_fk",
+          "tableFrom": "team-members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "team-members_teamId_teams_id_fk": {
+          "name": "team-members_teamId_teams_id_fk",
+          "tableFrom": "team-members",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "teamId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -313,8 +490,30 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "team_idx": {
+          "name": "team_idx",
+          "columns": [
+            "ownerId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "teams_ownerId_users_id_fk": {
+          "name": "teams_ownerId_users_id_fk",
+          "tableFrom": "teams",
+          "tableTo": "users",
+          "columnsFrom": [
+            "ownerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -412,5 +611,8 @@
     "schemas": {},
     "tables": {},
     "columns": {}
+  },
+  "internal": {
+    "indexes": {}
   }
 }

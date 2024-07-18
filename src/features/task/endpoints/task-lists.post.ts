@@ -136,7 +136,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       teamId: projectResult[0].teamId,
       title: data.title,
       ownerId: user.id,
-    })
+      position: data.position ?? 0,
+      // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+    } as any)
     .returning();
 
   // Emit event

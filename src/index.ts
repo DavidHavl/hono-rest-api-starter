@@ -2,6 +2,7 @@ import { bootstrapFeatures } from '@/features/bootstrap';
 import { notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { dbMiddleware } from '@/middleware/db.middleware';
 import { kvMiddleware } from '@/middleware/kv.middleware';
+import { isPathMatch } from '@/utils/path';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
@@ -21,6 +22,15 @@ app.use(logger());
 
 // Helmet like middleware
 app.use(secureHeaders());
+
+// JSON:API compliant content type only //
+app.on('*', (c, next) => {
+  const excludePaths = ['/', '/docs', '/auth/github*'];
+  if (isPathMatch(c.req.path, excludePaths) && c.req.header('Content-Type') !== 'application/vnd.api+json') {
+    return c.json({ error: 'Unsupported Media Type' }, { status: 415 });
+  }
+  return next();
+});
 
 // CORS //
 app.use((c, next) => {

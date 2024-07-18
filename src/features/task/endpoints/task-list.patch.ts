@@ -11,6 +11,7 @@ import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import type { Context } from 'hono';
 
 const entityType = 'task-lists';
@@ -119,6 +120,43 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Authorizarion
   if (found[0].ownerId !== user.id) {
     return unauthorizedResponse(c, 'You are not the owner of the task list');
+  }
+
+  // Update position and positions of other tasks in the list
+  if (data.position && data.position !== found[0].position) {
+    const taskLists = await db
+      .select()
+      .from(TaskListsTable)
+      .where(eq(TaskListsTable.projectId, found[0].projectId))
+      .orderBy(TaskListsTable.position);
+    if (taskLists.length > 1) {
+      let position = data.position;
+      const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
+        db
+          .update(TaskListsTable)
+          // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+          .set({ position } as any)
+          .where(eq(TaskListsTable.id, found[0].id)),
+      ];
+      for (const taskList of taskLists) {
+        if (taskList.id === id) {
+          continue;
+        }
+        if (taskList.position >= data.position) {
+          position++;
+          batchQueries.push(
+            db
+              .update(TaskListsTable)
+              // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+              .set({ position } as any)
+              .where(eq(TaskListsTable.id, taskList.id)),
+          );
+        }
+      }
+      if (batchQueries.length) {
+        await db.batch(batchQueries);
+      }
+    }
   }
 
   // Update in DB

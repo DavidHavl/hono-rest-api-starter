@@ -94,6 +94,7 @@ web_modules/
 
 # cloudflare workers dev variables
 .dev.vars
+.test.vars
 
 # dotenv environment variable files
 
@@ -101,6 +102,11 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+
+# Drizzle dev configuration file
+
+drizzle.config.dev.json
+drizzle.config.test.json
 
 # parcel-bundler cache (https://parceljs.org/)
 

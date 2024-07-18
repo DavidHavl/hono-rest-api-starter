@@ -6,6 +6,7 @@ export const SelectTaskSchema = createSelectSchema(TasksTable);
 
 export const CreateTaskSchema = createInsertSchema(TasksTable, {
   title: z.string().min(1).trim(),
+  position: z.number().int().min(0).default(0),
 }).omit({
   id: true,
   ownerId: true,
@@ -32,6 +33,7 @@ export const TaskSchema = z
       ownerId: 'dfgerdew35647568utjh',
       assigneeId: 'dfgerdew35647568utjh',
       isCompleted: false,
+      position: 3,
       completedAt: '2024-04-19T14:37:58.000Z',
       createdAt: '2024-04-19T14:37:58.000Z',
       updatedAt: '2024-04-19T14:37:58.000Z',

@@ -181,9 +181,13 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Fetch tasks
   let result = [];
   if (listId) {
-    result = await db.select().from(TasksTable).where(eq(TasksTable.listId, listId));
+    result = await db.select().from(TasksTable).where(eq(TasksTable.listId, listId)).orderBy(TasksTable.position);
   } else {
-    result = await db.select().from(TasksTable).where(eq(TasksTable.teamId, teamIdToCheck));
+    result = await db
+      .select()
+      .from(TasksTable)
+      .where(eq(TasksTable.teamId, teamIdToCheck))
+      .orderBy(TasksTable.position);
   }
 
   // Include assignee details if requested
