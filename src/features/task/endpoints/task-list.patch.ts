@@ -10,7 +10,7 @@ import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 import type { BatchItem } from 'drizzle-orm/batch';
 import type { Context } from 'hono';
 
@@ -128,7 +128,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       .select()
       .from(TaskListsTable)
       .where(eq(TaskListsTable.projectId, found[0].projectId))
-      .orderBy(TaskListsTable.position);
+      .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
     if (taskLists.length > 1) {
       let position = data.position;
       const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [

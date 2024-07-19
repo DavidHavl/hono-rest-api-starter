@@ -12,7 +12,8 @@ import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import type { Context } from 'hono';
 
 const entityType = 'tasks';
@@ -120,6 +121,33 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Authorization
   if (teamMemberResult.length === 0) {
     return unauthorizedResponse(c);
+  }
+
+  // Update position and positions of other tasks in the list
+  const tasks = await db
+    .select()
+    .from(TasksTable)
+    .where(eq(TasksTable.listId, listResult[0].id))
+    .orderBy(asc(TasksTable.position), desc(TasksTable.createdAt));
+  if (tasks.length > 1) {
+    let position = data.position;
+    // @ts-ignore
+    const batchQueries: [BatchItem<'sqlite'>] = [];
+    for (const task of tasks) {
+      if (task.position >= data.position) {
+        position++;
+        batchQueries.push(
+          db
+            .update(TasksTable)
+            // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+            .set({ position } as any)
+            .where(eq(TasksTable.id, task.id)),
+        );
+      }
+    }
+    if (batchQueries.length) {
+      await db.batch(batchQueries);
+    }
   }
 
   // Insert into DB
