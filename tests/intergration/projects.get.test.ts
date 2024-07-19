@@ -19,7 +19,7 @@ const MOCK_ENV = {
   },
 };
 
-describe('Auth signout POST endpoint', () => {
+describe('Projects GET endpoint', () => {
   let cookieContent = '';
   let db: TestDatabase = null;
   let entities = null;
@@ -45,11 +45,12 @@ describe('Auth signout POST endpoint', () => {
   });
 
   // Tests
-  it('should respond with 204 when calling POST /projects', async () => {
+  it('should respond with 200 when calling /projects', async () => {
+    const queryParams = new URLSearchParams({ teamId: entities.teams[0].id });
     const res = await app.request(
-      '/auth/signout',
+      `/projects?${queryParams.toString()}`,
       {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/vnd.api+json',
           Accept: 'application/vnd.api+json',
@@ -58,8 +59,26 @@ describe('Auth signout POST endpoint', () => {
       },
       MOCK_ENV,
     );
-    console.info(res);
     expect(res).not.toBeNull();
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+  });
+
+  it('should respond with 200 when calling /projects/id', async () => {
+    const res = await app.request(
+      `/projects/${entities.projects[0].id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json',
+          Cookie: `${cookieContent}`,
+        },
+      },
+      MOCK_ENV,
+    );
+
+    expect(res).not.toBeNull();
+    expect(res.status).toBe(200);
+    // expect(mock).toHaveBeenCalledWith({ id: '1', text: 'Buy milk' });
   });
 });

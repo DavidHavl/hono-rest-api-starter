@@ -19,7 +19,7 @@ const MOCK_ENV = {
   },
 };
 
-describe('Auth signout POST endpoint', () => {
+describe('Projects POST endpoint', () => {
   let cookieContent = '';
   let db: TestDatabase = null;
   let entities = null;
@@ -45,9 +45,9 @@ describe('Auth signout POST endpoint', () => {
   });
 
   // Tests
-  it('should respond with 204 when calling POST /projects', async () => {
+  it('should respond with 200 when calling POST /projects', async () => {
     const res = await app.request(
-      '/auth/signout',
+      '/projects',
       {
         method: 'POST',
         headers: {
@@ -55,11 +55,15 @@ describe('Auth signout POST endpoint', () => {
           Accept: 'application/vnd.api+json',
           Cookie: `${cookieContent}`,
         },
+        body: JSON.stringify({
+          title: '  Test project  ',
+          teamId: entities.teams[0].id,
+        }),
       },
       MOCK_ENV,
     );
     console.info(res);
     expect(res).not.toBeNull();
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
   });
 });
