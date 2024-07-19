@@ -23,8 +23,8 @@ app.use(logger());
 // Helmet like middleware
 app.use(secureHeaders());
 
-// JSON:API compliant content type only //
-app.on('*', (c, next) => {
+// Content Type Guard - allow JSON:API compliant content type only //
+app.use(async (c, next) => {
   const excludePaths = ['/', '/docs', '/auth/github*'];
   if (isPathMatch(c.req.path, excludePaths) && c.req.header('Content-Type') !== 'application/vnd.api+json') {
     return c.json({ error: 'Unsupported Media Type' }, { status: 415 });
