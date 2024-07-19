@@ -20,6 +20,6 @@ export const ProjectsTable = sqliteTable(
     updatedAt: integer('updatedAt', { mode: 'timestamp' }).$onUpdateFn(() => new Date()),
   },
   (table) => ({
-    teamIdx: index('team_idx').on(table.teamId),
+    teamIdx: index('projects_teamId_idx').on(table.teamId),
   }),
 );

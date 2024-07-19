@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1ddff24b-2b34-4dd7-a3ef-d36c01a16caf",
+  "id": "9156791e-0992-4675-a4c5-4c99cb22a8a2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "projects": {
@@ -51,8 +51,8 @@
         }
       },
       "indexes": {
-        "team_idx": {
-          "name": "team_idx",
+        "projects_teamId_idx": {
+          "name": "projects_teamId_idx",
           "columns": [
             "teamId"
           ],
@@ -152,15 +152,15 @@
         }
       },
       "indexes": {
-        "project_idx": {
-          "name": "project_idx",
+        "task-lists_projectId_idx": {
+          "name": "task-lists_projectId_idx",
           "columns": [
             "projectId"
           ],
           "isUnique": false
         },
-        "team_idx": {
-          "name": "team_idx",
+        "task-lists_teamId_idx": {
+          "name": "task-lists_teamId_idx",
           "columns": [
             "teamId"
           ],
@@ -277,22 +277,22 @@
         }
       },
       "indexes": {
-        "list_idx": {
-          "name": "list_idx",
+        "tasks_listId_idx": {
+          "name": "tasks_listId_idx",
           "columns": [
             "listId"
           ],
           "isUnique": false
         },
-        "project_idx": {
-          "name": "project_idx",
+        "tasks_projectId_idx": {
+          "name": "tasks_projectId_idx",
           "columns": [
             "projectId"
           ],
           "isUnique": false
         },
-        "team_idx": {
-          "name": "team_idx",
+        "tasks_teamId_idx": {
+          "name": "tasks_teamId_idx",
           "columns": [
             "teamId"
           ],
@@ -412,10 +412,17 @@
         }
       },
       "indexes": {
-        "team_idx": {
-          "name": "team_idx",
+        "team-members_userId_idx": {
+          "name": "team-members_userId_idx",
           "columns": [
             "userId"
+          ],
+          "isUnique": false
+        },
+        "team-members_teamId_idx": {
+          "name": "team-members_teamId_idx",
+          "columns": [
+            "teamId"
           ],
           "isUnique": false
         }
@@ -491,8 +498,8 @@
         }
       },
       "indexes": {
-        "team_idx": {
-          "name": "team_idx",
+        "teams_ownerId_idx": {
+          "name": "teams_ownerId_idx",
           "columns": [
             "ownerId"
           ],

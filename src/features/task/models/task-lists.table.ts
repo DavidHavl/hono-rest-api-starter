@@ -16,7 +16,7 @@ export const TaskListsTable = sqliteTable(
     updatedAt: integer('updatedAt', { mode: 'timestamp' }).$onUpdateFn(() => new Date()),
   },
   (table) => ({
-    projectIdx: index('project_idx').on(table.projectId),
-    teamIdx: index('team_idx').on(table.teamId),
+    projectIdx: index('task-lists_projectId_idx').on(table.projectId),
+    teamIdx: index('task-lists_teamId_idx').on(table.teamId),
   }),
 );

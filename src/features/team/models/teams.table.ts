@@ -17,6 +17,6 @@ export const TeamsTable = sqliteTable(
     updatedAt: integer('updatedAt', { mode: 'timestamp' }).$onUpdateFn(() => new Date()),
   },
   (table) => ({
-    ownerIdx: index('team_idx').on(table.ownerId),
+    ownerIdx: index('teams_ownerId_idx').on(table.ownerId),
   }),
 );

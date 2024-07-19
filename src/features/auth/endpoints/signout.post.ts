@@ -10,5 +10,5 @@ export const handler = async (c: Context<Env>) => {
     await deleteSession(c, session.id);
   }
   deleteCookie(c, cookieName);
-  return c.status(204);
+  return c.body(null, 204);
 };

@@ -76,11 +76,12 @@ CREATE TABLE `users` (
 	`updatedAt` integer
 );
 --> statement-breakpoint
-CREATE INDEX `team_idx` ON `projects` (`teamId`);--> statement-breakpoint
-CREATE INDEX `project_idx` ON `task-lists` (`projectId`);--> statement-breakpoint
-CREATE INDEX `team_idx` ON `task-lists` (`teamId`);--> statement-breakpoint
-CREATE INDEX `list_idx` ON `tasks` (`listId`);--> statement-breakpoint
-CREATE INDEX `project_idx` ON `tasks` (`projectId`);--> statement-breakpoint
-CREATE INDEX `team_idx` ON `tasks` (`teamId`);--> statement-breakpoint
-CREATE INDEX `team_idx` ON `team-members` (`userId`);--> statement-breakpoint
-CREATE INDEX `team_idx` ON `teams` (`ownerId`);
+CREATE INDEX `projects_teamId_idx` ON `projects` (`teamId`);--> statement-breakpoint
+CREATE INDEX `task-lists_projectId_idx` ON `task-lists` (`projectId`);--> statement-breakpoint
+CREATE INDEX `task-lists_teamId_idx` ON `task-lists` (`teamId`);--> statement-breakpoint
+CREATE INDEX `tasks_listId_idx` ON `tasks` (`listId`);--> statement-breakpoint
+CREATE INDEX `tasks_projectId_idx` ON `tasks` (`projectId`);--> statement-breakpoint
+CREATE INDEX `tasks_teamId_idx` ON `tasks` (`teamId`);--> statement-breakpoint
+CREATE INDEX `team-members_userId_idx` ON `team-members` (`userId`);--> statement-breakpoint
+CREATE INDEX `team-members_teamId_idx` ON `team-members` (`teamId`);--> statement-breakpoint
+CREATE INDEX `teams_ownerId_idx` ON `teams` (`ownerId`);
