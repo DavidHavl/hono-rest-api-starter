@@ -7,6 +7,8 @@ import type { User } from '@/features/user/models/user.type';
 import { createEmitter } from 'hono-event-emitter';
 
 export type EmitterEvents = {
+  'auth:signin': { user: User };
+  'auth:signout': { user: User };
   'user:created': { user: User };
   'team:created': { team: Team };
   'team-member:created': { teamMember: TeamMember };

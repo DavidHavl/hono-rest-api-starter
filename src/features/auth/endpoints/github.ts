@@ -1,5 +1,5 @@
 import { emitter } from '@/events';
-import type { GitHubUser } from '@/features/auth/models/github-user';
+import type { GitHubUser } from '@/features/auth/models/github-user.type';
 import { useGithubProvider } from '@/features/auth/providers/github.provider';
 import { createSession } from '@/features/auth/utils/session';
 import { badRequestResponse } from '@/features/shared/responses/bad-request.response';

@@ -1,4 +1,4 @@
-import type { Session } from '@/features/auth/models/session';
+import type { Session } from '@/features/auth/models/session.type';
 import type { User } from '@/features/user/models/user.type';
 import type { Env } from '@/types';
 import { getRandomBytes } from '@/utils/crypto';
