@@ -1,5 +1,5 @@
 import type { EmitterEvents } from '@/events';
-import type { Session } from '@/features/auth/models/session';
+import type { Session } from '@/features/auth/models/session.type';
 import type { DrizzleD1Database } from 'drizzle-orm/d1/driver';
 import type { Emitter } from 'hono-event-emitter';
 
