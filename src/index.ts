@@ -28,7 +28,7 @@ app.use(async (c, next) => {
   const excludePaths = ['/', '/docs', '/auth/github*'];
   if (
     !isPathMatch(c.req.path, excludePaths) &&
-    ['POST', 'PATCH', 'DELETE'].includes(c.req.method) &&
+    !['GET', 'OPTIONS'].includes(c.req.method) &&
     c.req.header('Content-Type') !== 'application/vnd.api+json'
   ) {
     return c.json({ error: 'Unsupported Media Type' }, { status: 415 });
