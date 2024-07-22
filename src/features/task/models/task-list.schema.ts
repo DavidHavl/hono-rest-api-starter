@@ -16,7 +16,7 @@ export const CreateTaskListSchema = createInsertSchema(TaskListsTable, {
 
 export const UpdateTaskListSchema = CreateTaskListSchema.omit({
   projectId: true,
-});
+}).partial();
 
 export const TaskListSchema = z
   .object(SelectTaskListSchema.shape)
