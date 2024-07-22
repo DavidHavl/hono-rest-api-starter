@@ -36,7 +36,7 @@ app.use(async (c, next) => {
 app.use((c, next) => {
   const corsMiddleware = cors({
     origin: c.env.CORS_ORIGINS.split(','), // (origin) => origin,
-    allowHeaders: ['Content-Type', 'X-Auth-Return-Redirect', 'X-Custom-Header', 'Upgrade-Insecure-Requests'],
+    allowHeaders: ['Content-Type', 'Accept', 'X-Auth-Return-Redirect', 'X-Custom-Header', 'Upgrade-Insecure-Requests'],
     allowMethods: ['POST', 'GET', 'DELETE', 'PATCH', 'OPTIONS'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
