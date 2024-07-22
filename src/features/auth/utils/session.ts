@@ -40,5 +40,5 @@ export const getSessionById = async (c: Context<Env>, id: string) => {
 };
 
 export const deleteSession = async (c: Context<Env>, sessionId: string) => {
-  return c.get('kv').delete(sessionId);
+  return c.get('kv').delete(`session_${sessionId}`);
 };
