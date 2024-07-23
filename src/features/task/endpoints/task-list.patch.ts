@@ -130,30 +130,43 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       .where(eq(TaskListsTable.projectId, found[0].projectId))
       .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
     if (taskLists.length > 1) {
-      let position = Number(data.position);
+      const newPosition = Number(data.position);
+      const oldPosition = Number(found[0].position);
+      const direction = newPosition > oldPosition ? 'up' : 'down';
       const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
         db
           .update(TaskListsTable)
           // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
-          .set({ position } as any)
+          .set({ position: newPosition } as any)
           .where(eq(TaskListsTable.id, found[0].id)),
       ];
       for (const taskList of taskLists) {
         if (taskList.id === id) {
           continue;
         }
-        if (Number(taskList.position) >= Number(data.position)) {
-          position++;
+        let pos = Number(taskList.position);
+        if (direction === 'up') {
+          // If the task is moved up, we need to move all tasks that are between the old and new position down
+          if (Number(taskList.position) > oldPosition && Number(taskList.position) <= newPosition) {
+            pos--;
+          }
+        } else {
+          // If the task is moved down, we need to move all tasks that are between the old and new position up
+          if (Number(taskList.position) < oldPosition && Number(taskList.position) >= newPosition) {
+            pos++;
+          }
+        }
+        if (pos !== Number(taskList.position)) {
           batchQueries.push(
             db
               .update(TaskListsTable)
               // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
-              .set({ position } as any)
+              .set({ position: pos } as any)
               .where(eq(TaskListsTable.id, taskList.id)),
           );
         }
       }
-      if (batchQueries.length) {
+      if (batchQueries.length > 0) {
         await db.batch(batchQueries);
       }
     }
