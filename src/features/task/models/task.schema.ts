@@ -7,6 +7,8 @@ export const SelectTaskSchema = createSelectSchema(TasksTable);
 export const CreateTaskSchema = createInsertSchema(TasksTable, {
   title: z.string().min(1).trim(),
   position: z.number().int().min(0).default(0),
+  dueAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional(),
 }).omit({
   id: true,
   ownerId: true,
