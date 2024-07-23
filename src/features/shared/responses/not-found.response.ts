@@ -1,4 +1,3 @@
-import type { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 
@@ -20,7 +19,7 @@ export const NotFoundResponseSchema = z.object({
 export const notFoundResponse = (c: Context, message?: string) => {
   const url = new URL(c.req.url);
   c.status(404);
-  return c.json<z.infer<typeof ErrorResponseSchema>, 404>({
+  return c.json<z.infer<typeof NotFoundResponseSchema>, 404>({
     errors: [
       {
         status: 404,
