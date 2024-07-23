@@ -123,14 +123,14 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   }
 
   // Update position and positions of other tasks in the list
-  if (data.position && data.position !== found[0].position) {
+  if (data.position !== undefined && Number(data.position) !== Number(found[0].position)) {
     const taskLists = await db
       .select()
       .from(TaskListsTable)
       .where(eq(TaskListsTable.projectId, found[0].projectId))
       .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
     if (taskLists.length > 1) {
-      let position = data.position;
+      let position = Number(data.position);
       const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
         db
           .update(TaskListsTable)
@@ -142,7 +142,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
         if (taskList.id === id) {
           continue;
         }
-        if (taskList.position >= data.position) {
+        if (Number(taskList.position) >= Number(data.position)) {
           position++;
           batchQueries.push(
             db
