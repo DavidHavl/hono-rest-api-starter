@@ -165,34 +165,46 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     const tasks = await db
       .select()
       .from(TasksTable)
-      .where(eq(TasksTable.listId, found[0].listId))
+      .where(eq(TasksTable.projectId, found[0].projectId))
       .orderBy(asc(TasksTable.position), desc(TasksTable.createdAt));
     if (tasks.length > 1) {
-      let position = Number(data.position);
+      const newPosition = Number(data.position);
+      const oldPosition = Number(found[0].position);
+      const direction = newPosition > oldPosition ? 'up' : 'down';
       const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
-        // Update the task position
         db
           .update(TasksTable)
           // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
-          .set({ position } as any)
+          .set({ position: newPosition } as any)
           .where(eq(TasksTable.id, found[0].id)),
       ];
       for (const task of tasks) {
         if (task.id === id) {
           continue;
         }
-        if (Number(task.position) >= Number(data.position)) {
-          position++;
+        let pos = Number(task.position);
+        if (direction === 'up') {
+          // If the task is moved up, we need to move all tasks that are between the old and new position down
+          if (Number(task.position) > oldPosition && Number(task.position) <= newPosition) {
+            pos--;
+          }
+        } else {
+          // If the task is moved down, we need to move all tasks that are between the old and new position up
+          if (Number(task.position) < oldPosition && Number(task.position) >= newPosition) {
+            pos++;
+          }
+        }
+        if (pos !== Number(task.position)) {
           batchQueries.push(
             db
               .update(TasksTable)
               // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
-              .set({ position } as any)
+              .set({ position: pos } as any)
               .where(eq(TasksTable.id, task.id)),
           );
         }
       }
-      if (batchQueries.length) {
+      if (batchQueries.length > 0) {
         await db.batch(batchQueries);
       }
     }
