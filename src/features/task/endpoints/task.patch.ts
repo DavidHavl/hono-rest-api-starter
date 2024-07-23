@@ -171,7 +171,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       const newPosition = Number(data.position);
       const oldPosition = Number(found[0].position);
       const direction = newPosition > oldPosition ? 'up' : 'down';
-      const batchQueries: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
+      const batchQueries: [BatchItem<'sqlite'>] = [
         db
           .update(TasksTable)
           // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields

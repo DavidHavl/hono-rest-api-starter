@@ -134,12 +134,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .from(TaskListsTable)
     .where(eq(TaskListsTable.projectId, projectResult[0].id))
     .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
-  if (taskLists.length > 1) {
-    let position = data.position;
+  if (taskLists.length > 0) {
+    let position = data.position ? Number(data.position) : 0;
     // @ts-ignore
     const batchQueries: [BatchItem<'sqlite'>] = [];
     for (const taskList of taskLists) {
-      if (taskList.position >= data.position) {
+      if (Number(taskList.position) >= position) {
         position++;
         batchQueries.push(
           db
@@ -164,7 +164,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       teamId: projectResult[0].teamId,
       title: data.title,
       ownerId: user.id,
-      position: data.position ?? 0,
+      position: data.position ? Number(data.position) : 0,
       // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
     } as any)
     .returning();
