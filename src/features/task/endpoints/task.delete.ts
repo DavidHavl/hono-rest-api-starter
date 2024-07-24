@@ -8,7 +8,7 @@ import { TasksTable } from '@/features/task/models/tasks.table';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'tasks';
@@ -113,8 +113,38 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c);
   }
 
+  const removedPosition = Number(found[0].position);
+  const listId = found[0].listId;
+
   // delete from DB
   await db.delete(TasksTable).where(eq(TasksTable.id, id));
+
+  // Update positions of other task lists
+  const taskLists = await db
+    .select()
+    .from(TasksTable)
+    .where(eq(TasksTable.listId, listId))
+    .orderBy(asc(TasksTable.position), desc(TasksTable.createdAt));
+  if (taskLists.length > 1) {
+    // @ts-ignore
+    const batchQueries: [BatchItem<'sqlite'>] = [];
+    for (const taskList of taskLists) {
+      let pos = Number(taskList.position);
+      if (pos > removedPosition) {
+        pos--;
+        batchQueries.push(
+          db
+            .update(TasksTable)
+            // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+            .set({ position: pos } as any)
+            .where(eq(TasksTable.id, taskList.id)),
+        );
+      }
+    }
+    if (batchQueries.length > 0) {
+      await db.batch(batchQueries);
+    }
+  }
 
   // Emit event
   await emitter.emitAsync('task:deleted', c, { taskId: id });

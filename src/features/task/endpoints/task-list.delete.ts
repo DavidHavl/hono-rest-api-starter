@@ -7,7 +7,8 @@ import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/sha
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import type { Context } from 'hono';
 
 const entityType = 'task-lists';
@@ -99,8 +100,38 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c, 'You are not the owner of the task list');
   }
 
+  const removedPosition = Number(found[0].position);
+  const projectId = found[0].projectId;
+
   // delete from DB
   await db.delete(TaskListsTable).where(eq(TaskListsTable.id, id));
+
+  // Update positions of other task lists
+  const taskLists = await db
+    .select()
+    .from(TaskListsTable)
+    .where(eq(TaskListsTable.projectId, projectId))
+    .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
+  if (taskLists.length > 1) {
+    // @ts-ignore
+    const batchQueries: [BatchItem<'sqlite'>] = [];
+    for (const taskList of taskLists) {
+      let pos = Number(taskList.position);
+      if (pos > removedPosition) {
+        pos--;
+        batchQueries.push(
+          db
+            .update(TaskListsTable)
+            // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
+            .set({ position: pos } as any)
+            .where(eq(TaskListsTable.id, taskList.id)),
+        );
+      }
+    }
+    if (batchQueries.length > 0) {
+      await db.batch(batchQueries);
+    }
+  }
 
   // Emit event
   await emitter.emitAsync('task-list:deleted', c, { taskListId: id });

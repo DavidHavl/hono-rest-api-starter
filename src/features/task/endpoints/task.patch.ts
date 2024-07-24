@@ -165,7 +165,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     const tasks = await db
       .select()
       .from(TasksTable)
-      .where(eq(TasksTable.projectId, found[0].projectId))
+      .where(eq(TasksTable.listId, found[0].listId))
       .orderBy(asc(TasksTable.position), desc(TasksTable.createdAt));
     if (tasks.length > 1) {
       const newPosition = Number(data.position);
