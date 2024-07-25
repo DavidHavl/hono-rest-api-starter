@@ -218,7 +218,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       dueAt: data.dueAt ? new Date(Number(data.dueAt)) : found[0].dueAt,
       isCompleted: data.isCompleted !== undefined ? Boolean(data.isCompleted) : found[0].isCompleted,
       completedAt,
-      position: data.position || found[0].position,
+      position: data.position ?? found[0].position,
       // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
     } as any)
     .where(eq(TasksTable.id, id))
