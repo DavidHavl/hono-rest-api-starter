@@ -104,7 +104,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Get all task lists for the project
   const taskLists = await db.select().from(TaskListsTable).where(eq(TaskListsTable.projectId, id));
   if (taskLists.length > 0) {
-    return badRequestResponse(c, 'Project has task lists, delete them first');
+    return badRequestResponse(c, 'Project has task lists, delete them first', null, {
+      error_code: 'ERR_PROJECT_NOT_EMPTY',
+    });
   }
 
   // delete from DB

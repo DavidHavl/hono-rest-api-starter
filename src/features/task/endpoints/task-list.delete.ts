@@ -108,7 +108,9 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Get all tasks for the task list
   const tasks = await db.select().from(TasksTable).where(eq(TasksTable.listId, id));
   if (tasks.length > 0) {
-    return badRequestResponse(c, 'Task list is not empty');
+    return badRequestResponse(c, 'Task list is not empty', null, {
+      error_code: 'ERR_TASK-LIST_NOT_EMPTY',
+    });
   }
 
   // delete from DB
