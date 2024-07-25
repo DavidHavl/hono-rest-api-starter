@@ -155,6 +155,14 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     }
   }
 
+  let position = 0;
+  if (data.position !== undefined) {
+    position = Number(data.position);
+  } else if (taskLists.length > 0) {
+    // Set position to the end of the list
+    position = Number(taskLists[taskLists.length - 1].position) + 1;
+  }
+
   // Insert into DB
   const result = await db
     .insert(TaskListsTable)
@@ -164,7 +172,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       teamId: projectResult[0].teamId,
       title: data.title,
       ownerId: user.id,
-      position: data.position ? Number(data.position) : 0,
+      position,
       // biome-ignore lint/suspicious/noExplicitAny: Because of drizzle-orm types bug that does not see optional fields
     } as any)
     .returning();
