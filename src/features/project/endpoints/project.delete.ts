@@ -2,9 +2,11 @@ import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
+import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { TaskListsTable } from '@/features/task/models/task-lists.table';
 import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
@@ -97,6 +99,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Authorizarion
   if (found[0].ownerId !== user.id) {
     return unauthorizedResponse(c);
+  }
+
+  // Get all task lists for the project
+  const taskLists = await db.select().from(TaskListsTable).where(eq(TaskListsTable.projectId, id));
+  if (taskLists.length > 0) {
+    return badRequestResponse(c, 'Project has task lists, delete them first');
   }
 
   // delete from DB

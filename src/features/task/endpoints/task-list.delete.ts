@@ -1,10 +1,12 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
+import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TaskListsTable } from '@/features/task/models/task-lists.table';
+import { TasksTable } from '@/features/task/models/tasks.table';
 import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
 import { asc, desc, eq } from 'drizzle-orm';
@@ -102,6 +104,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
 
   const removedPosition = Number(found[0].position);
   const projectId = found[0].projectId;
+
+  // Get all tasks for the task list
+  const tasks = await db.select().from(TasksTable).where(eq(TasksTable.listId, id));
+  if (tasks.length > 0) {
+    return badRequestResponse(c, 'Task list is not empty');
+  }
 
   // delete from DB
   await db.delete(TaskListsTable).where(eq(TaskListsTable.id, id));
