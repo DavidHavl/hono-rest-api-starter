@@ -1,4 +1,5 @@
 import { getCurentUser } from '@/features/auth/utils/current-user';
+import { ProjectsTable } from '@/features/project/models/projects.table';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
 import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
@@ -112,6 +113,19 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     );
   }
 
+  // Check if there are any projects in the team
+  const teamProjects = await db.select().from(ProjectsTable).where(eq(ProjectsTable.teamId, id));
+
+  if (teamProjects.length > 0) {
+    return badRequestResponse(
+      c,
+      'Cannot delete team with projects',
+      'You cannot delete a team with projects',
+      { id, error_code: 'ERR_TEAM_HAS_PROJECTS' },
+      { pointer: '/data/attributes/id' },
+    );
+  }
+
   // Check if there are any team members other than the owner
   const teamMembers = await db
     .select()
@@ -131,11 +145,11 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Delete all team members
   await db.delete(TeamMembersTable).where(eq(TeamMembersTable.teamId, id));
 
+  // Delete all team projects
+  await db.delete(ProjectsTable).where(eq(ProjectsTable.teamId, id));
+
   // delete from DB
   await db.delete(TeamsTable).where(eq(TeamsTable.id, id));
-
-  // Emit event
-  // await emitter.emitAsync('team:deleted', { c, teamId: id });
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: {
