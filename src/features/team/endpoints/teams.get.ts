@@ -9,7 +9,7 @@ import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { eq, inArray } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
@@ -93,7 +93,11 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
 
   const ids = teamMemberResult.map((teamMember) => teamMember.teamId);
 
-  const result = await db.select().from(TeamsTable).where(inArray(TeamsTable.id, ids));
+  const result = await db
+    .select()
+    .from(TeamsTable)
+    .where(inArray(TeamsTable.id, ids))
+    .orderBy(desc(TeamsTable.createdAt));
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
     data: result.map((team) => ({
