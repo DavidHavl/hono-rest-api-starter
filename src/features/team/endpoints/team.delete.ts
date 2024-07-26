@@ -4,10 +4,11 @@ import { badRequestResponse } from '@/features/shared/responses/bad-request.resp
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
+import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import { TeamsTable } from '@/features/team/models/teams.table';
 import type { Env } from '@/types';
 import { createRoute, z } from '@hono/zod-openapi';
-import { eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
@@ -106,10 +107,29 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       c,
       'Cannot delete last team',
       'You cannot delete your last team',
-      { id },
+      { id, error_code: 'ERR_TEAM_LAST_TEAM' },
       { pointer: '/data/attributes/id' },
     );
   }
+
+  // Check if there are any team members other than the owner
+  const teamMembers = await db
+    .select()
+    .from(TeamMembersTable)
+    .where(and(eq(TeamMembersTable.teamId, id), ne(TeamMembersTable.userId, user.id)));
+
+  if (teamMembers.length > 0) {
+    return badRequestResponse(
+      c,
+      'Cannot delete team with members',
+      'You cannot delete a team with members other than yourself',
+      { id, error_code: 'ERR_TEAM_HAS_OTHER_MEMBERS' },
+      { pointer: '/data/attributes/id' },
+    );
+  }
+
+  // Delete all team members
+  await db.delete(TeamMembersTable).where(eq(TeamMembersTable.teamId, id));
 
   // delete from DB
   await db.delete(TeamsTable).where(eq(TeamsTable.id, id));
