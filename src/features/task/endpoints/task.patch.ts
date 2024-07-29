@@ -165,11 +165,14 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     const tasks = await db
       .select()
       .from(TasksTable)
-      .where(eq(TasksTable.listId, found[0].listId))
+      .where(eq(TasksTable.listId, data.listId ?? found[0].listId))
       .orderBy(asc(TasksTable.position), desc(TasksTable.createdAt));
-    if (tasks.length > 1) {
+    // Check if the task is moved between lists
+    const movingBetweenLists = data.listId && data.listId !== found[0].listId;
+    // Check there are any tasks in the list we are moving task to
+    if (tasks.length > 0) {
       const newPosition = Number(data.position);
-      const oldPosition = Number(found[0].position);
+      const oldPosition = movingBetweenLists ? tasks.length - 1 : Number(found[0].position);
       const direction = newPosition > oldPosition ? 'up' : 'down';
       const batchQueries: [BatchItem<'sqlite'>] = [
         db
