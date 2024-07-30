@@ -134,8 +134,17 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     .from(TaskListsTable)
     .where(eq(TaskListsTable.projectId, projectResult[0].id))
     .orderBy(asc(TaskListsTable.position), desc(TaskListsTable.createdAt));
+
+  // Positions
+  let position = 0;
+  if (data.position !== undefined) {
+    position = Number(data.position);
+  } else if (taskLists.length > 0) {
+    // Set position to the end of the list
+    position = Number(taskLists[taskLists.length - 1].position) + 1;
+  }
+
   if (taskLists.length > 0) {
-    let position = data.position ? Number(data.position) : 0;
     // @ts-ignore
     const batchQueries: [BatchItem<'sqlite'>] = [];
     for (const taskList of taskLists) {
@@ -153,14 +162,6 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     if (batchQueries.length) {
       await db.batch(batchQueries);
     }
-  }
-
-  let position = 0;
-  if (data.position !== undefined) {
-    position = Number(data.position);
-  } else if (taskLists.length > 0) {
-    // Set position to the end of the list
-    position = Number(taskLists[taskLists.length - 1].position) + 1;
   }
 
   // Insert into DB
