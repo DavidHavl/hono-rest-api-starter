@@ -3,6 +3,7 @@ import { ErrorResponseSchema } from '@/features/shared/models/error-respone.sche
 import { createCollectionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { TeamMemberSchema } from '@/features/team/models/team-member.schema';
+import type { TeamMember } from '@/features/team/models/team-member.type';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
 import type { User } from '@/features/user/models/user.type';
 import { UsersTable } from '@/features/user/models/users.table';
@@ -21,7 +22,7 @@ const fieldKeys = Object.keys(TeamMemberSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
   include: z.enum(['user']).optional().openapi({ example: 'user' }),
-  teamId: z.string().openapi({ example: '123456789' }),
+  teamId: z.string().optional().openapi({ example: '123456789' }),
 });
 
 interface RequestValidationTargets {
@@ -81,22 +82,27 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c);
   }
 
-  const teamMemberResult = await db.select().from(TeamMembersTable).where(eq(TeamMembersTable.teamId, teamId));
-
-  // Check if user is a member of the team
-  if (
-    teamMemberResult.length === 0 ||
-    !teamMemberResult.some(
-      (teamMember) => teamMember.userId === user.id /*&& teamMember.hasUserAccepted && teamMember.hasTeamAccepted,*/,
-    )
-  ) {
-    return unauthorizedResponse(c, 'Not a member of given team');
+  let teamMemberResult: TeamMember[];
+  if (teamId !== undefined) {
+    teamMemberResult = await db.select().from(TeamMembersTable).where(eq(TeamMembersTable.teamId, teamId));
+    // Check if user is a member of the team
+    if (teamMemberResult.length === 0 || !teamMemberResult.some((teamMember) => teamMember.userId === user.id)) {
+      return unauthorizedResponse(c, 'Not a member of given team');
+    }
+  } else {
+    teamMemberResult = await db
+      .select()
+      .from(TeamMembersTable)
+      .where(eq(TeamMembersTable.userId, user.id))
+      .orderBy(TeamMembersTable.createdAt);
   }
 
   let users: User[] = [];
   if (include?.split(',').includes('user')) {
     const userIds = teamMemberResult.map((teamMember) => teamMember.userId);
-    users = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+    if (userIds.length > 0) {
+      users = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+    }
   }
 
   return c.json<z.infer<typeof ResponseSchema>, 200>({
