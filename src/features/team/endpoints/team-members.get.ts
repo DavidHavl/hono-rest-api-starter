@@ -5,6 +5,8 @@ import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/sha
 import { TeamMemberSchema } from '@/features/team/models/team-member.schema';
 import type { TeamMember } from '@/features/team/models/team-member.type';
 import { TeamMembersTable } from '@/features/team/models/team-members.table';
+import type { Team } from '@/features/team/models/team.type';
+import { TeamsTable } from '@/features/team/models/teams.table';
 import type { User } from '@/features/user/models/user.type';
 import { UsersTable } from '@/features/user/models/users.table';
 import type { Env } from '@/types';
@@ -21,7 +23,7 @@ const entityType = 'team-members';
 const fieldKeys = Object.keys(TeamMemberSchema.shape) as [string];
 const QuerySchema = z.object({
   fields: z.enum<string, typeof fieldKeys>(fieldKeys).optional(),
-  include: z.enum(['user']).optional().openapi({ example: 'user' }),
+  include: z.enum(['user', 'team']).optional().openapi({ example: 'user' }),
   teamId: z.string().optional().openapi({ example: '123456789' }),
 });
 
@@ -97,11 +99,20 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       .orderBy(TeamMembersTable.createdAt);
   }
 
+  // Include users
   let users: User[] = [];
   if (include?.split(',').includes('user')) {
     const userIds = teamMemberResult.map((teamMember) => teamMember.userId);
     if (userIds.length > 0) {
       users = await db.select().from(UsersTable).where(inArray(UsersTable.id, userIds));
+    }
+  }
+  // Include teams
+  let teams: Team[] = [];
+  if (include?.split(',').includes('team')) {
+    const teamIds = teamMemberResult.map((teamMember) => teamMember.teamId);
+    if (teamIds.length > 0) {
+      teams = await db.select().from(TeamsTable).where(inArray(TeamsTable.id, teamIds));
     }
   }
 
@@ -121,6 +132,16 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
                   id: teamMember.userId,
                   type: 'users',
                   attributes: users.find((user) => user.id === teamMember.userId),
+                },
+              }
+            : undefined,
+        team:
+          teams.length > 0
+            ? {
+                data: {
+                  id: teamMember.teamId,
+                  type: 'teams',
+                  attributes: teams.find((team) => team.id === teamMember.teamId),
                 },
               }
             : undefined,
