@@ -1,6 +1,7 @@
 import { emitter } from '@/events';
 import { getCurentUser } from '@/features/auth/utils/current-user';
 import { ErrorResponseSchema } from '@/features/shared/models/error-respone.schema';
+import { badRequestResponse } from '@/features/shared/responses/bad-request.response';
 import { NotFoundResponseSchema, notFoundResponse } from '@/features/shared/responses/not-found.response';
 import { createDeletionSuccessResponseSchema } from '@/features/shared/responses/success.response';
 import { UnauthorizedResponseSchema, unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
@@ -106,6 +107,11 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
   // Authorizarion (check if user is a team member or team owner)
   if (teamMember.userId !== user.id && team.ownerId !== user.id) {
     return unauthorizedResponse(c);
+  }
+
+  // Check if user is trying to delete himself from the team he owns
+  if (team.ownerId === user.id && teamMember.userId === user.id) {
+    return badRequestResponse(c, 'Cannot delete yourself from the team. You are the owner!');
   }
 
   // delete from DB
