@@ -138,7 +138,7 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     data.hasUserAccepted = undefined;
   }
 
-  if (Object.keys(data).length === 0) {
+  if (Object.keys(data).length !== 0) {
     // Update in DB
     teamMember = await db
       .update(TeamMembersTable)
