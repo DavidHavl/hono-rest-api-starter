@@ -140,11 +140,12 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
 
   if (Object.keys(data).length !== 0) {
     // Update in DB
-    teamMember = await db
+    const updated = await db
       .update(TeamMembersTable)
       .set(filterUndefinedObjectProperties(data))
       .where(eq(TeamMembersTable.id, id))
-      .returning()[0];
+      .returning();
+    teamMember = updated[0];
   }
 
   // Emit event
