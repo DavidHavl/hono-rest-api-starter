@@ -114,8 +114,8 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
       and(
         eq(TeamMembersTable.teamId, result[0].id),
         eq(TeamMembersTable.userId, user.id),
-        // eq(TeamMembersTable.hasUserAccepted, true),
-        // eq(TeamMembersTable.hasTeamAccepted, true),
+        eq(TeamMembersTable.hasUserAccepted, true),
+        eq(TeamMembersTable.hasTeamAccepted, true),
       ),
     );
 

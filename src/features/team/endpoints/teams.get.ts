@@ -9,7 +9,7 @@ import type { Env } from '@/types';
 import { pickObjectProperties } from '@/utils/object';
 import { buildUrlQueryString } from '@/utils/url';
 import { createRoute, z } from '@hono/zod-openapi';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 const entityType = 'teams';
@@ -77,13 +77,16 @@ export const handler = async (c: Context<Env, typeof entityType, RequestValidati
     return unauthorizedResponse(c, 'No user found');
   }
 
-  const teamMemberResult = await db.select().from(TeamMembersTable).where(
-    // and(
-    eq(TeamMembersTable.userId, user.id),
-    // eq(TeamMembersTable.hasUserAccepted, true),
-    // eq(TeamMembersTable.hasTeamAccepted, true),
-    // ),
-  );
+  const teamMemberResult = await db
+    .select()
+    .from(TeamMembersTable)
+    .where(
+      and(
+        eq(TeamMembersTable.userId, user.id),
+        eq(TeamMembersTable.hasUserAccepted, true),
+        eq(TeamMembersTable.hasTeamAccepted, true),
+      ),
+    );
 
   // Unauthorized
   // Check if user is a member of the team
