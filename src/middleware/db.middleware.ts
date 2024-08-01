@@ -12,7 +12,7 @@ export const dbMiddleware = async (c: Context<Env>, next) => {
   }
 
   if (db === null) {
-    db = drizzle(c.env.DB, { logger: true });
+    db = drizzle(c.env.DB, { logger: c.env.ENVIRONMENT !== 'production' });
   }
 
   c.set('db', db);

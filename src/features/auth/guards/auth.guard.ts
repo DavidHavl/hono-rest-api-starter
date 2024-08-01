@@ -1,4 +1,4 @@
-import { deleteSession, getSessionById, updateSessionExpiration } from '@/features/auth/utils/session';
+import { deleteSession, getSessionById } from '@/features/auth/utils/session';
 import { unauthorizedResponse } from '@/features/shared/responses/unauthorized.response';
 import { isPathMatch } from '@/utils/path';
 import type { Context } from 'hono';
@@ -42,9 +42,11 @@ export const authGuard = (config?: AuthGuardConfig) => {
         await deleteSession(c, sessionID);
         return unauthorizedResponse(c, 'Session expired');
       }
+
       // Extend session expiration for another 1 day (AUTH_SESSION_EXPIRATION_MS)
-      const expiresAt = new Date(Date.now() + c.env.AUTH_SESSION_EXPIRATION_MS);
-      await updateSessionExpiration(c, sessionID, expiresAt);
+      // const expiresAt = new Date(Date.now() + c.env.AUTH_SESSION_EXPIRATION_MS);
+      // await updateSessionExpiration(c, sessionID, expiresAt);
+
       // Set session in context
       c.set('session', session);
     } catch (error) {
