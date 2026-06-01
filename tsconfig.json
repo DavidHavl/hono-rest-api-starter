@@ -1,0 +1,24 @@
+{
+  "extends": "@total-typescript/tsconfig/tsc/no-dom/app",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+
+    /* Rules */
+    "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
+
+    "rootDir": "src",
+    "outDir": "dist",
+
+    /* Global Types to be included */
+    "types": ["@types/node"],
+
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}

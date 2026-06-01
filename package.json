@@ -1,0 +1,61 @@
+{
+  "name": "hono-rest-api-starter",
+  "version": "1.0.0",
+  "description": "",
+  "author": "David Havl <contact@davidhavl.com>",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build:node": "tsc && tsc-alias",
+    "dev": "tsx watch src/server.ts --env-file=.env",
+    "start": "node ./dist/src/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/db/seed.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@hono/event-emitter": "^2.0.0",
+    "@hono/zod-openapi": "^1.4.0",
+    "@js-temporal/polyfill": "^0.5.1",
+    "@loglayer/hono": "^2.2.0",
+    "@loglayer/transport-simple-pretty-terminal": "^3.1.0",
+    "@scalar/hono-api-reference": "^0.10.19",
+    "@scalar/openapi-to-markdown": "^0.5.20",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "drizzle-zod": "^0.8.3",
+    "hono": "^4.12.23",
+    "loglayer": "^9.2.0",
+    "serialize-error": "^13.0.1",
+    "uuidv7": "^1.2.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@hono/node-server": "^2.0.4",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/node": "^25.9.1",
+    "@vitest/coverage-v8": "4.1.7",
+    "drizzle-kit": "^0.31.10",
+    "tsc-alias": "^1.8.17",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7",
+    "wrangler": "^4.95.0"
+  },
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^6"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

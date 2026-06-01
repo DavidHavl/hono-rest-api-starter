@@ -1,0 +1,71 @@
+# temporary
+/tmp
+/out-tsc
+
+# Build directories
+dist
+
+# Dependency directories
+
+/node_modules
+jspm_packages/
+
+# Logs
+
+*.log
+logs
+_.log
+npm-debug.log_
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# Runtime data
+
+pids
+_.pid
+_.seed
+\*.pid.lock
+
+# Coverage directory used by tools like istanbul
+
+coverage
+\*.lcov
+
+# cloudflare workers dev variables
+.dev.vars
+.test.vars
+
+# dotenv environment variable files
+
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Drizzle dev configuration file
+
+drizzle.config.dev.json
+drizzle.config.test.json
+drizzle/
+
+# IDEs
+
+.vscode/*
+.idea
+.run
+.claude
+
+# wrangler project
+
+.wrangler
+/wrangler.toml
+
+# Other
+
+.DS_Store

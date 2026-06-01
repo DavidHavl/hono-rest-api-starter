@@ -1,0 +1,30 @@
+name="hono-rest-api-starter"
+main="src/index.ts"
+compatibility_date="2026-04-01"
+account_id=""
+route={ pattern = "", zone_name = "", custom_domain = true }
+keep_vars=true # Keep variables/secrets set in the cloudflare dashboard (do not overwrite with dev ones)
+
+[vars]
+ENVIROMENT="development" # Environment name
+PROJECT_NAME="hono-api-starter" # Project name
+CORS_ORIGINS="app.website.com" # Comma separated list of allowed origins
+COOKIE_DOMAIN=".website.com" # Domain to set cookies on
+AUTH_CALLBACK_URL="https://api.website.com/auth/github/callback" # URL of the callback route
+AUTH_REDIRECT_URL="https://website.com/home" # URL to redirect to after successful login
+AUTH_SECRET="" # 32 characters long secret key for JWT signing and verification
+AUTH_GITHUB_CLIENT_ID="" # GitHub OAuth client ID
+AUTH_GITHUB_CLIENT_SECRET="" # GitHub OAuth client secret
+AUTH_SESSION_EXPIRATION_MS=86400000 # 24 hours
+
+[env.production.vars]
+ENVIROMENT="production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "d1-database"
+database_id = ""
+
+[[kv_namespaces]]
+binding = "KV"
+id = ""
