@@ -13,3 +13,6 @@ export type NonBodyTarget = 'param' | 'query' | 'header' | 'cookie';
 export type SparseFieldsets = {
   [resourceType: string]: string[];
 };
+
+// Helper Types //
+export type NonEmptyArray<T> = [T, ...T[]];
